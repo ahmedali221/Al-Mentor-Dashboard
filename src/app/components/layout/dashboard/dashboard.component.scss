@@ -1,0 +1,16 @@
+.sidenav {
+    width: 250px;
+}
+.mat-mdc-list-item {
+    &.active {
+        background-color:#eb2027 ; 
+        color: white ; // White text
+
+        .mat-icon,
+        .mdc-list-item__primary-text {
+            color: white; // White icon and label
+        }
+    }
+
+  
+}
