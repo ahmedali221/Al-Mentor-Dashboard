@@ -1,16 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  active: boolean;
-}
+import { UsersService } from '../../services/users.service';
+import { User } from '../../interfaces/user.interface';
 
 @Component({
   selector: 'app-users',
@@ -24,12 +18,35 @@ interface User {
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
-export class UsersComponent {
-  displayedColumns: string[] = ['id', 'name', 'email', 'role', 'actions'];
-  users: User[] = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', active: true },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', active: true },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor', active: false },
-    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'User', active: true },
-  ];
+export class UsersComponent implements OnInit {
+  displayedColumns: string[] = ['username', 'email', 'role', 'firstName', 'actions'];
+  users: User[] = [];
+  error = '';
+
+
+  constructor(private usersService: UsersService) { }
+
+  ngOnInit() {
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.usersService.getUsers().subscribe(users => {
+      this.users = users;
+    });
+  }
+
+  deleteUser(userId: string) {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.usersService.deleteUser(userId).subscribe({
+        next: () => {
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.error = 'Failed to delete user';
+          console.error('Error deleting user:', error);
+        }
+      });
+    }
+  }
 }

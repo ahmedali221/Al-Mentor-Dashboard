@@ -1,1 +1,48 @@
-<p>courses works!</p>
+<div class="courses-container">
+  <div class="header">
+    <h1>Courses Management</h1>
+    <button mat-flat-button color="primary">
+      <mat-icon>add</mat-icon>
+      Add New Instructor
+    </button>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <table mat-table [dataSource]="courses">
+        <mat-text-column name="title"></mat-text-column>
+        <mat-text-column name="language"></mat-text-column>
+        <ng-container matColumnDef="instructor">
+          <th mat-header-cell *matHeaderCellDef>Instructor Name</th>
+          <td mat-cell *matCellDef="let course">
+            {{ course.instructorDetails.profile.firstName }}
+            {{ course.instructorDetails.profile.lastName }}
+          </td>
+        </ng-container>
+        <mat-text-column name="level"></mat-text-column>
+        <ng-container matColumnDef="enrollmentCount">
+          <th mat-header-cell *matHeaderCellDef>Enrollement Count</th>
+          <td mat-cell *matCellDef="let course">
+            {{ course.enrollmentCount }}
+            <span>Stuents</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef>Total Duration</th>
+          <td mat-cell *matCellDef="let course">
+            {{ course.duration }} <small>Hours</small>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="rating">
+          <th mat-header-cell *matHeaderCellDef>Rating</th>
+          <td mat-cell *matCellDef="let course">
+            {{ course.rating.average }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let myRowData; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

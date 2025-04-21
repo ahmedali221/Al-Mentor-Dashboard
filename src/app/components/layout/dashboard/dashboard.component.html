@@ -6,7 +6,10 @@
     [mode]="'side'"
     [opened]="true"
   >
-    <mat-toolbar class="white-toolbar">Al Mentor Dashboard</mat-toolbar>
+    <mat-toolbar-row>
+      <img src="/almentor-logo.jpeg" alt="Almentor Logo" class="logo-icon" />
+      <h3 class="dashboard-title">Almentor Dashboard</h3>
+    </mat-toolbar-row>
     <mat-nav-list>
       @for (item of menuItems; track item.path) {
       <a
@@ -20,6 +23,15 @@
       </a>
       }
     </mat-nav-list>
+
+    <div class="theme-toggle">
+      <div class="theme-toggle-content">
+        <span class="theme-label">Switch Mode</span>
+        <mat-slide-toggle [(ngModel)]="isDarkTheme" (change)="toggleTheme()">
+          Dark Mode
+        </mat-slide-toggle>
+      </div>
+    </div>
   </mat-sidenav>
   <mat-sidenav-content>
     <mat-toolbar class="white-toolbar">

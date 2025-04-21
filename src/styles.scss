@@ -7,6 +7,19 @@
   --background-color: #ffffff;
   --text-light: #ffffff;
   --text-dark: #000000;
+  --sidebar-bg: #212121;
+  --sidebar-text: #ffffff;
+  --toolbar-bg: #ffffff;
+  --toolbar-text: #000000;
+}
+
+.dark-theme {
+  --background-color: #121212;
+  --text-dark: #ffffff;
+  --sidebar-bg: #1e1e1e;
+  --sidebar-text: #ffffff;
+  --toolbar-bg: #1e1e1e;
+  --toolbar-text: #ffffff;
 }
 
 html,
@@ -21,8 +34,6 @@ body {
 // Global Material components background
 .mat-app-background,
 .mat-drawer-container,
-.mat-sidenav,
-.mat-sidenav-content,
 mat-toolbar,
 mat-card,
 .mat-mdc-card,
@@ -42,24 +53,6 @@ mat-card,
   &.mat-primary {
     background-color: var(--primary-color) !important;
     color: var(--text-light) !important;
-  }
-}
-
-// Sidebar active item
-.mat-nav-list {
-  .mat-mdc-list-item {
-    &.active {
-      background-color: rgba(235, 32, 39, 0.1) !important;
-      color: var(--primary-color) !important;
-
-      .mat-icon {
-        color: var(--primary-color) !important;
-      }
-    }
-
-    &:hover {
-      background-color: rgba(235, 32, 39, 0.04) !important;
-    }
   }
 }
 
@@ -93,44 +86,14 @@ button[mat-raised-button].mat-primary {
   color: var(--text-dark);
 }
 
-
-// Add this after the existing styles
-.mat-icon {
-  margin-right: 12px !important;  // Adds space after every icon
+// Sidebar specific styles
+.mat-sidenav {
+  background-color: var(--sidebar-bg) !important;
+  color: var(--sidebar-text) !important;
 }
 
-// Update sidebar list items to handle icon spacing
-.mat-nav-list {
-  .mat-mdc-list-item {
-    .mat-icon {
-      margin-right: 16px !important;  // Slightly larger space for sidebar icons
-    }
-    
-    &.active {
-      background-color: rgba(235, 32, 39, 0.1) !important;
-      color: var(--primary-color) !important;
-
-      .mat-icon {
-        color: var(--primary-color) !important;
-      }
-    }
-
-    &:hover {
-      background-color: rgba(235, 32, 39, 0.04) !important;
-    }
-  }
-}
-
-// Handle button icons
-.mat-mdc-button,
-.mat-mdc-raised-button,
-.mat-mdc-flat-button {
-  .mat-icon {
-    margin-right: 8px !important;  // Smaller space for button icons
-  }
-  
-  &.mat-primary {
-    background-color: var(--primary-color) !important;
-    color: var(--text-light) !important;
-  }
+// Toolbar specific styles
+.mat-toolbar {
+  background-color: var(--toolbar-bg) !important;
+  color: var(--toolbar-text) !important;
 }

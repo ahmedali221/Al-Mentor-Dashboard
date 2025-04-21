@@ -1,1 +1,88 @@
-<p>instructors works!</p>
+<div class="instructors-container">
+  <div class="header">
+    <h1>Instructors Management</h1>
+    <button mat-flat-button color="primary">
+      <mat-icon>add</mat-icon>
+      Add New Instructor
+    </button>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <table mat-table [dataSource]="instructors">
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td mat-cell *matCellDef="let instructor">{{ instructor.user }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="professionalTitle">
+          <th mat-header-cell *matHeaderCellDef>Professional Title</th>
+          <td mat-cell *matCellDef="let instructor">
+            {{ instructor.professionalTitle }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="expertiseAreas">
+          <th mat-header-cell *matHeaderCellDef>Expertise Areas</th>
+          <td mat-cell *matCellDef="let instructor">
+            <span *ngIf="instructor.expertiseAreas">{{
+              instructor.expertiseAreas.join(", ")
+            }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="profile">
+          <th mat-header-cell *matHeaderCellDef>Instructor</th>
+          <td mat-cell *matCellDef="let instructor">
+            {{ instructor.profile?.firstName }}
+            {{ instructor.profile?.lastName }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let instructor">
+            {{ instructor.profile?.email }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="approvalStatus">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let instructor">
+            <span
+              [ngStyle]="{
+                color:
+                  instructor.approvalStatus === 'approved'
+                    ? 'green'
+                    : instructor.approvalStatus === 'rejected'
+                    ? 'red'
+                    : 'orange'
+              }"
+            >
+              {{ instructor.approvalStatus }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let instructor">
+            <button mat-icon-button color="primary">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteInstructor(instructor._id)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

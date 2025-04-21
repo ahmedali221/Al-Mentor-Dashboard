@@ -5,6 +5,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +19,9 @@ import { MatIconModule } from '@angular/material/icon';
     MatSidenavModule,
     MatToolbarModule,
     MatListModule,
-    MatIconModule
+    MatIconModule,
+    MatSlideToggleModule,
+    FormsModule
   ]
 })
 export class DashboardComponent {
@@ -28,4 +32,11 @@ export class DashboardComponent {
     { path: '/programs', icon: 'library_books', label: 'Programs' },
     { path: '/topics', icon: 'topic', label: 'Topics' }
   ];
+
+  isDarkTheme = true;
+
+  toggleTheme() {
+    document.body.classList.toggle('dark-theme', this.isDarkTheme);
+    localStorage.setItem('theme', this.isDarkTheme ? 'dark' : 'light');
+  }
 }
