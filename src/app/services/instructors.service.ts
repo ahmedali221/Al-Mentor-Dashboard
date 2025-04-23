@@ -33,14 +33,15 @@ export class InstructorsService {
     );
   }
 
-  createInstructor(instructor: Instructor): Observable<Instructor> {
+  addInstructor(instructor: Instructor): Observable<Instructor> {
     return this.http.post<{ data: Instructor }>(this.apiUrl, instructor).pipe(
       map(response => response.data)
     );
   }
 
-  updateInstructor(id: string, instructor: Partial<Instructor>): Observable<Instructor> {
-    return this.http.put<{ data: Instructor }>(`${this.apiUrl}/${id}`, instructor).pipe(
+  updateInstructor(instructor: Instructor): Observable<Instructor> {
+    // Use _id as the identifier for update
+    return this.http.put<{ data: Instructor }>(`${this.apiUrl}/${instructor._id}`, instructor).pipe(
       map(response => response.data)
     );
   }

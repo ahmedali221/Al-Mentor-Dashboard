@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { InstructorsService } from '../../services/instructors.service';
 import { Instructor } from '../../interfaces/instructor.interface';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+
 
 @Component({
   selector: 'app-instructors',
@@ -19,7 +24,7 @@ import { Instructor } from '../../interfaces/instructor.interface';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatInputModule
+    MatInputModule, MatDividerModule, ReactiveFormsModule, MatDialogModule, MatSelectModule
   ],
   templateUrl: './instructors.component.html',
   styleUrl: './instructors.component.scss'
@@ -31,7 +36,36 @@ export class InstructorsComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private instructorsService: InstructorsService,) { }
+  addInstructorForm: FormGroup;
+  updateInstructorForm: FormGroup;
+  selectedInstructor: Instructor | null = null;
+
+  @ViewChild('addInstructorDialog') addInstructorDialog!: TemplateRef<any>;
+  @ViewChild('updateInstructorDialog') updateInstructorDialog!: TemplateRef<any>;
+
+  constructor(
+    private instructorsService: InstructorsService,
+    private fb: FormBuilder,
+    private dialog: MatDialog
+  ) {
+    // Add Instructor Form
+    this.addInstructorForm = this.fb.group({
+      user: ['', Validators.required],
+      professionalTitle: ['', Validators.required],
+      expertiseAreas: ['', Validators.required], // comma separated string
+      biography: [''],
+      approvalStatus: ['pending', Validators.required]
+    });
+
+    // Update Instructor Form
+    this.updateInstructorForm = this.fb.group({
+      user: ['', Validators.required],
+      professionalTitle: ['', Validators.required],
+      expertiseAreas: ['', Validators.required], // comma separated string
+      biography: [''],
+      approvalStatus: ['pending', Validators.required]
+    });
+  }
 
   ngOnInit() {
     console.log("Getting the data");
@@ -64,6 +98,9 @@ export class InstructorsComponent implements OnInit {
     );
   }
 
+  get totalInstructors(): number {
+    return this.instructors.length;
+  }
   deleteInstructor(userId: string) {
     if (confirm('Are you sure you want to delete this instructor?')) {
       this.instructorsService.deleteInstructor(userId).subscribe({
@@ -73,6 +110,58 @@ export class InstructorsComponent implements OnInit {
         error: (error) => {
           this.error = 'Failed to delete instructor';
           console.error('Error deleting instructor:', error);
+        }
+      });
+    }
+  }
+
+  openAddInstructorForm() {
+    this.addInstructorForm.reset({ approvalStatus: 'pending' });
+    this.dialog.open(this.addInstructorDialog, { width: '70%' });
+  }
+
+  openUpdateInstructorForm(instructor: Instructor) {
+    this.selectedInstructor = instructor;
+    this.updateInstructorForm.patchValue({
+      user: instructor.user,
+      professionalTitle: instructor.professionalTitle,
+      expertiseAreas: instructor.expertiseAreas.join(', '),
+      biography: instructor.biography,
+      approvalStatus: instructor.approvalStatus
+    });
+    this.dialog.open(this.updateInstructorDialog, { width: '70%' });
+  }
+
+  addInstructor() {
+    if (this.addInstructorForm.valid) {
+      const formValue = this.addInstructorForm.value;
+      const newInstructor: Instructor = {
+        ...formValue,
+        expertiseAreas: formValue.expertiseAreas.split(',').map((s: string) => s.trim()),
+        approvalStatus: formValue.approvalStatus
+      };
+      this.instructorsService.addInstructor(newInstructor).subscribe({
+        next: () => {
+          this.loadInstructors();
+          this.dialog.closeAll();
+        }
+      });
+    }
+  }
+
+  updateInstructor() {
+    if (this.updateInstructorForm.valid && this.selectedInstructor) {
+      const formValue = this.updateInstructorForm.value;
+      const updatedInstructor: Instructor = {
+        ...this.selectedInstructor,
+        ...formValue,
+        expertiseAreas: formValue.expertiseAreas.split(',').map((s: string) => s.trim()),
+        approvalStatus: formValue.approvalStatus
+      };
+      this.instructorsService.updateInstructor(updatedInstructor).subscribe({
+        next: () => {
+          this.loadInstructors();
+          this.dialog.closeAll();
         }
       });
     }

@@ -16,4 +16,18 @@ export class ProgramsService {
     console.log("Fetching data from ", this.apiUrl);
     return this.http.get<program[]>(this.apiUrl);
   }
+
+  addProgram(program: program): Observable<program> {
+    return this.http.post<program>(this.apiUrl, program);
+  }
+
+  updateProgram(program: program): Observable<program> {
+    const url = `${this.apiUrl}/${program._id}`;
+    return this.http.put<program>(url, program);
+  }
+
+  deleteProgram(id: string): Observable<void> {
+    const url = `${this.apiUrl}/${id}`;
+    return this.http.delete<void>(url);
+  }
 }

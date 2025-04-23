@@ -24,8 +24,10 @@ export class UsersService {
     return this.http.post<User>(this.apiUrl, user);
   }
 
-  updateUser(username: string, user: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/${username}`, user);
+  updateUser(user: User): Observable<User> {
+    // Use _id if available, otherwise fallback to username
+    const identifier = user._id || user.username;
+    return this.http.put<User>(`${this.apiUrl}/${identifier}`, user);
   }
 
   deleteUser(id: string): Observable<void> {

@@ -14,4 +14,27 @@
             color: var(--text-dark);
         }
     }
+
+    .cards-row {
+        display: flex;
+        gap: 16px; /* Adjust the value as needed */
+        margin-bottom: 16px;
+    }
+}
+
+.instructor-form-grid .grid-container {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
 }
