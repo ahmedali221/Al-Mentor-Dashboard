@@ -12,6 +12,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -27,14 +29,15 @@ import { MatSelectModule } from '@angular/material/select';
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatInputModule, MatSelectModule
+    MatInputModule, MatSelectModule, MatChipsModule
 
   ],
   templateUrl: './programs.component.html',
   styleUrl: './programs.component.scss'
 })
 export class ProgramsComponent {
-  displayedColumns: string[] = ['title', 'level', 'language', 'category', 'totalDuration', 'Instructors', 'actions'];
+  readonly programFields: string[] = ['technology', 'business', 'language'];
+  displayedColumns: string[] = ['title', 'level', 'language', 'category', 'totalDuration', 'Courses', 'actions'];
   programs: program[] = [];
   addForm: FormGroup;
   updateForm: FormGroup;
@@ -43,7 +46,8 @@ export class ProgramsComponent {
   constructor(
     private programService: ProgramsService,
     private fb: FormBuilder,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router // Add this
   ) {
     this.addForm = this.fb.group({
       title: ['', Validators.required],
@@ -72,10 +76,29 @@ export class ProgramsComponent {
     this.loadPrograms();
   }
 
+  searchQuery: string = '';
+  filteredPrograms: program[] = [];
+
+  applySearchFilter() {
+    if (!this.searchQuery) {
+      this.filteredPrograms = [...this.programs];
+      return;
+    }
+
+    const query = this.searchQuery.toLowerCase();
+    this.filteredPrograms = this.programs.filter(program =>
+      program.title.toLowerCase().includes(query) ||
+      program.category.toLowerCase().includes(query) ||
+      program.language.toLowerCase().includes(query)
+    );
+  }
+
+  // Update your loadPrograms method
   loadPrograms() {
     this.programService.getPrograms().subscribe({
       next: (data) => {
         this.programs = data;
+        this.filteredPrograms = [...data];
       }
     });
   }
@@ -147,5 +170,20 @@ export class ProgramsComponent {
     this.dialog.open(this.updateDialog, {
       width: '600px'
     });
+  }
+
+  onFieldClick(field: string) {
+    this.programService.getPrograms().subscribe({
+      next: (allPrograms) => {
+        this.programs = allPrograms.filter(program =>
+          program.category.toLowerCase() === field.toLowerCase()
+        );
+      }
+    });
+  }
+
+  // Add this method
+  viewProgramDetails(programId: string) {
+    this.router.navigate(['/programs', programId]);
   }
 }

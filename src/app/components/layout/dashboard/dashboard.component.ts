@@ -33,7 +33,7 @@ export class DashboardComponent {
     { path: '/topics', icon: 'topic', label: 'Topics' }
   ];
 
-  isDarkTheme = true;
+  isDarkTheme = false;
 
   toggleTheme() {
     document.body.classList.toggle('dark-theme', this.isDarkTheme);

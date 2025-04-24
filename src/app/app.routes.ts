@@ -5,18 +5,25 @@ import { InstructorsComponent } from './components/instructors/instructors.compo
 import { CoursesComponent } from './components/courses/courses.component';
 import { ProgramsComponent } from './components/programs/programs.component';
 import { TopicsComponent } from './components/topics/topics.component';
+import { ProgramDetailsComponent } from './components/program-details/program-details.component';
 
 export const routes: Routes = [
-    {
-        path: '',
-        component: DashboardComponent,
+  {
+    path: '',
+    component: DashboardComponent,
+    children: [
+      { path: 'users', component: UsersComponent },
+      { path: 'instructors', component: InstructorsComponent },
+      { path: 'courses', component: CoursesComponent },
+      {
+        path: 'programs', 
         children: [
-            { path: 'users', component: UsersComponent },
-            { path: 'instructors', component: InstructorsComponent },
-            { path: 'courses', component: CoursesComponent },
-            { path: 'programs', component: ProgramsComponent },
-            { path: 'topics', component: TopicsComponent },
-            { path: '', redirectTo: 'users', pathMatch: 'full' }
+          { path: '', component: ProgramsComponent },
+          { path: ':id', component: ProgramDetailsComponent }
         ]
-    }
+      },
+      { path: 'topics', component: TopicsComponent },
+      { path: '', redirectTo: 'users', pathMatch: 'full' }
+    ]
+  }
 ];
