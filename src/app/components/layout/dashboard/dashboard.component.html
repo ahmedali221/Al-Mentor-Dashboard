@@ -6,9 +6,11 @@
     [mode]="'side'"
     [opened]="true"
   >
-    <mat-toolbar-row>
-      <img src="/almentor-logo.jpeg" alt="Almentor Logo" class="logo-icon" />
-      <h3 class="dashboard-title">Almentor Dashboard</h3>
+    <mat-toolbar-row class="sidebar-header">
+      <div class="logo-container">
+        <img src="/almentor-logo.jpeg" alt="Almentor Logo" class="logo-icon" />
+        <h3 class="dashboard-title">Al Mentor</h3>
+      </div>
     </mat-toolbar-row>
     <mat-nav-list>
       @for (item of menuItems; track item.path) {
@@ -27,16 +29,18 @@
     <div class="theme-toggle">
       <div class="theme-toggle-content">
         <span class="theme-label">Switch Mode</span>
-        <mat-slide-toggle [(ngModel)]="isDarkTheme" (change)="toggleTheme()">
+        <mat-slide-toggle
+          [(ngModel)]="isDarkTheme"
+          (change)="toggleTheme()"
+          color="primary"
+          class="custom-slide-toggle"
+        >
           Dark Mode
         </mat-slide-toggle>
       </div>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <mat-toolbar class="white-toolbar">
-      <span>Dashboard</span>
-    </mat-toolbar>
     <div class="content">
       <router-outlet></router-outlet>
     </div>

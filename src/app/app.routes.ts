@@ -5,6 +5,7 @@ import { InstructorsComponent } from './components/instructors/instructors.compo
 import { CoursesComponent } from './components/courses/courses.component';
 import { ProgramsComponent } from './components/programs/programs.component';
 import { TopicsComponent } from './components/topics/topics.component';
+import { SubTopicsComponent } from './components/sub-topics/sub-topics.component';
 
 export const routes: Routes = [
     {
@@ -16,6 +17,7 @@ export const routes: Routes = [
             { path: 'courses', component: CoursesComponent },
             { path: 'programs', component: ProgramsComponent },
             { path: 'topics', component: TopicsComponent },
+            { path: 'SubTopics', component: SubTopicsComponent },
             { path: '', redirectTo: 'users', pathMatch: 'full' }
         ]
     }
