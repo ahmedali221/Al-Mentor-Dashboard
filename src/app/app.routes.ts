@@ -6,6 +6,8 @@ import { CoursesComponent } from './components/courses/courses.component';
 import { ProgramsComponent } from './components/programs/programs.component';
 import { TopicsComponent } from './components/topics/topics.component';
 import { ProgramDetailsComponent } from './components/program-details/program-details.component';
+import { PaymentsComponent } from './components/payments/payments.component';
+
 
 export const routes: Routes = [
   {
@@ -21,9 +23,10 @@ export const routes: Routes = [
           { path: '', component: ProgramsComponent },
           { path: ':id', component: ProgramDetailsComponent }
         ]
-      },
+      }, 
+       {path: 'payments', component:PaymentsComponent },
       { path: 'topics', component: TopicsComponent },
       { path: '', redirectTo: 'users', pathMatch: 'full' }
-    ]
+     ]
   }
 ];
