@@ -29,8 +29,10 @@ export class DashboardComponent {
     { path: '/users', icon: 'people', label: 'Users' },
     { path: '/instructors', icon: 'school', label: 'Instructors' },
     { path: '/courses', icon: 'book', label: 'Courses' },
+    { path: '/lessons', icon: 'check_circle', label: 'Lessons' },
     { path: '/programs', icon: 'library_books', label: 'Programs' },
-    { path: '/topics', icon: 'topic', label: 'Topics' }
+    { path: '/topics', icon: 'topic', label: 'Topics' },
+    {path:'/sub-topics', icon:'book',label:'SubTopics'}
   ];
 
   isDarkTheme = true;

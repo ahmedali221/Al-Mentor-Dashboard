@@ -1,4 +1,4 @@
-.topics-container {
+.subtopics-container {
   padding: 24px;
   background-color: var(--background-color);
 
@@ -13,6 +13,13 @@
       font-size: 24px;
       font-weight: bold;
     }
+
+    .add-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+    }
   }
 
   .cards-row {
@@ -20,7 +27,7 @@
     gap: 16px;
     margin-bottom: 24px;
 
-    mat-card {
+    .summary-card {
       flex: 1;
       background-color: var(--card-background);
       color: var(--text-dark);
@@ -31,7 +38,7 @@
         margin-bottom: 8px;
       }
 
-      p {
+      .summary-value {
         font-size: 24px;
         font-weight: bold;
         color: var(--primary-color);
@@ -39,35 +46,23 @@
     }
   }
 
-  .search-box {
+  .search-filter-row {
+    display: flex;
+    gap: 16px;
     margin-bottom: 24px;
 
-    mat-form-field {
-      width: 100%;
+    .search-bar,
+    .filter-dropdown {
+      flex: 1;
+
+      mat-form-field {
+        width: 100%;
+      }
     }
   }
 }
 
-.search-box,
-mat-form-field {
-  background-color: var(--input-background-color);
-  border-radius: 4px;
-
-  input,
-  mat-select {
-    color: var(--text-color);
-  }
-
-  mat-label {
-    color: var(--label-color);
-  }
-
-  mat-icon {
-    color: var(--icon-color);
-  }
-}
-
-.topic-form-grid .grid-container {
+.subtopic-form-grid .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
