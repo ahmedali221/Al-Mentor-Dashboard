@@ -95,4 +95,32 @@
       color: #c62828;
     }
   }
+  .course-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+  }
+  
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr; // Stack on small screens
+    }
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    padding-top: 16px;
+  }
+  
 }

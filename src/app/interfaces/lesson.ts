@@ -30,7 +30,6 @@ export interface Lesson {
   isPublished?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  
   courseId?: string; // added
   courseName?: string; // added
   status?: string; // added

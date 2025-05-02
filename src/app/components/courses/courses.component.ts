@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CoursesService } from '../../services/course.service';
 import { TopicsService } from '../../services/topics.service';
 import { Course } from '../../interfaces/course';
@@ -20,6 +20,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   selector: 'app-courses',
   templateUrl: './courses.component.html',
   styleUrls: ['./courses.component.scss'],
+  standalone: true,
   imports: [
     CommonModule,
     MatTableModule,
@@ -30,9 +31,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatDialogModule
-  ],
-  standalone: true
+    MatDialogModule,
+  ]
 })
 export class CoursesComponent implements OnInit {
   @ViewChild('addDialog') addDialog!: TemplateRef<any>;
@@ -46,7 +46,7 @@ export class CoursesComponent implements OnInit {
   selectedTopic = new FormControl('');
   course: any;
   selectedCourse: any;
-  
+  selectedTopicId: string = '';
   // Form groups for add and update
   addForm!: FormGroup;
   updateForm!: FormGroup;
@@ -61,7 +61,7 @@ export class CoursesComponent implements OnInit {
       this.filterCourses();
     });
     this.selectedTopic.valueChanges.subscribe(() => {
-      this.filterCourses();
+      this.filterCoursesTopic();
     });
   }
 
@@ -73,21 +73,24 @@ export class CoursesComponent implements OnInit {
   ) {
   // Initialize form groups
   
-    this.addForm = this.fb.group({
-      title: this.fb.group({
-        en: ['', Validators.required],
-        ar: ['']
-      }),
-      slug: ['', Validators.required],
-      description: this.fb.group({
-        en: ['', Validators.required],
-        ar: ['']
-      }),
-      topicId: ['', Validators.required],
-      instructor: ['', Validators.required],
-      thumbnailImgUrl: [''],
-      availableLanguages: [['en']]
-    });
+  this.addForm = this.fb.group({
+    title: this.fb.group({
+      en: ['', Validators.required],
+      ar: ['']
+    }),
+    slug: ['', Validators.required],
+    description: this.fb.group({
+      en: ['', Validators.required],
+      ar: ['']
+    }),
+    topicId: ['', Validators.required], // Must be set when submitting
+    instructor: ['', Validators.required], // Also required
+    thumbnailImgUrl: [''],
+    availableLanguages: this.fb.control(['en'])
+  });
+  
+
+
 
     this.updateForm = this.fb.group({
       _id: [''],
@@ -111,6 +114,8 @@ export class CoursesComponent implements OnInit {
     this.coursesService.getCourses().subscribe((data: Course[]) => {
       this.courses = data;
       this.filteredCourses = data;
+      // console.log(data);
+
     });
   }
 
@@ -126,6 +131,8 @@ export class CoursesComponent implements OnInit {
     this.topicsService.getTopics().subscribe({
       next: (topics) => {
         this.topics = topics;
+        console.log(topics);
+        
       },
       error: (error) => {
         console.error('Error loading topics:', error);
@@ -140,8 +147,12 @@ export class CoursesComponent implements OnInit {
       description: { en: '', ar: '' },
       availableLanguages: ['en']
     });
-    this.dialog.open(this.addDialog, {
-      width: '800px'
+    
+    // Use this approach for standalone components
+    setTimeout(() => {
+      this.dialog.open(this.addDialog, {
+        width: '800px'
+      });
     });
   }
 
@@ -164,29 +175,122 @@ export class CoursesComponent implements OnInit {
       thumbnailImgUrl: course.thumbnailImgUrl || '',
       availableLanguages: course.availableLanguages || []
     });
-    this.dialog.open(this.updateDialog, {
-      width: '800px'
+    
+    // Use this approach for standalone components
+    const dialogRef = this.dialog.open(this.updateDialog, {
+      width: '800px',
+      data: { course: course }
     });
-
-
   }
 
   // Add course
-  addNewCourse() {
-    if (this.addForm.valid) {
-      const newCourse = this.addForm.value;
-      this.coursesService.addCourse(newCourse).subscribe({
-        next: () => {
-          this.loadCourses();
-          this.closeDialog();
-        },
-        error: (error) => {
-          console.error('Error creating course:', error);
-        }
-      });
-    }
-  }
+  // addNewCourse() {
+  //   if (this.addForm.valid) {
+  //     const newCourse = {
+  //       ...this.addForm.value,
+  //       topic: this.addForm.value.topicId
+  //     };
+  //     delete newCourse.topicId;
+  
+  //     this.coursesService.addCourse(newCourse).subscribe({
+  //       next: () => {
+  //         this.loadCourses();
+  //         this.closeDialog();
+  //       },
+  //       error: (error) => {
+  //         console.error('Error creating course:', error);
+  //       }
+  //     });
+  //   }
+  // }
 
+  
+// Add course
+// addNewCourse() {
+//   if (this.addForm.valid) {
+//     // Create a properly formatted course object that matches the schema
+//     const newCourse = {
+//       title: {
+//         en: this.addForm.value.title?.en || '',
+//         ar: this.addForm.value.title?.ar || ''
+//       },
+//       slug: this.addForm.value.slug,
+//       description: {
+//         en: this.addForm.value.description?.en || '',
+//         ar: this.addForm.value.description?.ar || ''
+//       },
+//       topic: this.addForm.value.topicId, // This should be the ObjectId of the topic
+//       instructor: this.addForm.value.instructor, // This should be the ObjectId of the instructor
+//       thumbnailImgUrl: this.addForm.value.thumbnailImgUrl,
+//       availableLanguages: this.addForm.value.availableLanguages || ['en'],
+//       // Add other fields as needed
+//     };
+  
+//     this.coursesService.addCourse(newCourse).subscribe({
+//       next: () => {
+//         this.loadCourses();
+//         this.closeDialog();
+//       },
+//       error: (error) => {
+//         console.error('Error creating course:', error);
+//       }
+//     });
+//   }
+// }
+
+addNewCourse() {
+  if (this.addForm.valid) {
+    const formValue = this.addForm.value;
+
+    const newCourse = {
+      title: {
+        en: formValue.title?.en?.trim() || '',
+        ar: formValue.title?.ar?.trim() || ''
+      },
+      slug: formValue.slug?.trim(),
+      description: {
+        en: formValue.description?.en?.trim() || '',
+        ar: formValue.description?.ar?.trim() || ''
+      },
+      topic: formValue.topicId?.trim() || null, // assuming backend expects 'topic' not 'topicId'
+      instructor: formValue.instructor?.trim() || null,
+      thumbnailImgUrl: formValue.thumbnailImgUrl?.trim() || '',
+      availableLanguages: formValue.availableLanguages || ['en']
+    };
+
+    this.coursesService.addCourse(newCourse).subscribe({
+      next: () => {
+        this.loadCourses();
+        this.dialog.closeAll();
+      },
+      error: (error) => {
+        console.error('Error creating course:', error);
+
+        // Optional: Show user-friendly error message
+        alert('Failed to add course. Please check all required fields and try again.');
+      }
+    });
+  } else {
+    // Optional: touch all fields to show validation errors
+    this.addForm.markAllAsTouched();
+    alert('Please complete all required fields before submitting.');
+  }
+}
+
+
+// addNewCourse() {
+//   if (this.addForm.valid) {
+//     this.coursesService.addCourse(this.addForm.value).subscribe({
+//       next: () => {
+//         this.loadCourses();
+//         this.dialog.closeAll();
+//       },
+//       error: (err) => {
+//         console.error('Add topic error:', err);
+//       }
+//     });
+//   }
+// }
   // Update course
   // updateCourse() {
   //   if (this.updateForm.valid) {
@@ -245,8 +349,15 @@ export class CoursesComponent implements OnInit {
         course.title?.en?.toLowerCase().includes(search) ||
         course.slug?.toLowerCase().includes(search) ||
         course.instructor?.toLowerCase().includes(search);
-      const matchesTopic = topic ? course.topicId === topic : true;
-      return matchesSearch && matchesTopic;
+      return matchesSearch;
+    });
+    
+  }
+  // Filter courses by topic
+  filterCoursesTopic() {
+  const topicId = this.selectedTopic.value;
+    this.filteredCourses = this.courses.filter(course => {
+      return topicId === '' || course.topic === topicId;
     });
   }
 
@@ -255,4 +366,8 @@ export class CoursesComponent implements OnInit {
     this.searchControl.setValue('');
     this.selectedTopic.setValue('');
   }
+
 }
+
+
+

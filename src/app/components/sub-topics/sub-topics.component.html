@@ -32,7 +32,7 @@
       <mat-select [(ngModel)]="selectedTopicId" (selectionChange)="applyTopicFilter()">
         <mat-option [value]="''">All Topics</mat-option>
         <mat-option *ngFor="let topic of topics" [value]="topic._id">
-          {{ topic.name?.en || 'Unnamed Topic' }}
+          {{ topic.name?.en }}
         </mat-option>
       </mat-select>
     </mat-form-field>

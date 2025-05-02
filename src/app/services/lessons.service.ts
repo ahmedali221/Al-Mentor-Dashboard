@@ -12,30 +12,29 @@ import { Lesson } from '../interfaces/lesson';
   providedIn: 'root'
 })
 export class LessonsService {
-  private lessonsUrl = `${environment.apiUrl}/lessons`;
-  private coursesUrl = `${environment.apiUrl}/courses`;
+  private apiUrl = `${environment.apiUrl}`;
   
   constructor(private http: HttpClient) {}
 
   getLessons(): Observable<Lesson[]> {
-    console.log('Fetching lessons from:', this.lessonsUrl); // Debug line
-    return this.http.get<Lesson[]>(this.lessonsUrl);
+    console.log('Fetching lessons from:', this.apiUrl); // Debug line
+    return this.http.get<Lesson[]>(`${this.apiUrl}/lessons`);
   }
 
   getCourses(): Observable<Course[]> {
-    return this.http.get<Course[]>(this.coursesUrl);
+    return this.http.get<Course[]>(`${this.apiUrl}/courses`);
   }
 
-  addLesson(lesson: Omit<Lesson, 'id'>): Observable<Lesson> {
-    return this.http.post<Lesson>(this.lessonsUrl, lesson);
+  addLesson(lesson: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/lessons`, lesson);
   }
 
-  updateLesson(id: string, lesson: Partial<Lesson>): Observable<Lesson> {
-    return this.http.put<Lesson>(`${this.lessonsUrl}/${id}`, lesson);
+  updateLesson(id: string, lesson: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/lessons/${id}`, lesson);
   }
 
-  deleteLesson(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.lessonsUrl}/${id}`);
+  deleteLesson(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/lessons/${id}`);
   }
 }
 
