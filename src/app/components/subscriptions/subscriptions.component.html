@@ -1,0 +1,243 @@
+<div class="subscriptions-container">
+  <div class="header">
+    <h1>Subscriptions Management</h1>
+    <button mat-flat-button color="primary" (click)="openAddSubscriptionForm()">
+      <mat-icon>add</mat-icon>
+      Add New Subscription
+    </button>
+  </div>
+
+  <!-- Analysis Cards -->
+  <div class="cards-row">
+    <mat-card>
+      <mat-card-content>
+        <div>
+          <h3>Total Subscriptions</h3>
+          <p>{{ totalSubscriptions }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search Subscriptions</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applySearchFilter()"
+        placeholder="Search by name, display name, status..." />
+      <button matSuffix mat-icon-button aria-label="Search">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <!-- Subscriptions Table -->
+  <mat-card>
+    <mat-card-content>
+      <table mat-table [dataSource]="filteredSubscriptions" class="mat-elevation-z8">
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let subscription">{{ subscription.name }}</td>
+        </ng-container>
+
+        <!-- Display Name Column -->
+        <ng-container matColumnDef="displayName">
+          <th mat-header-cell *matHeaderCellDef>Display Name</th>
+          <td mat-cell *matCellDef="let subscription">{{ subscription.displayName.en }}</td>
+        </ng-container>
+
+        <!-- Price Column -->
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef>Price</th>
+          <td mat-cell *matCellDef="let subscription">{{ subscription.price.amount }} {{ subscription.price.currency }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="isActive">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let subscription">
+            <span [ngClass]="subscription.isActive ? 'active' : 'inactive'">
+              {{ subscription.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let subscription">
+            <button mat-icon-button color="primary" (click)="openUpdateSubscriptionForm(subscription)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteSubscription(subscription._id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Add Subscription Dialog -->
+  <ng-template #addSubscriptionDialog>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Add New Subscription</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="addSubscriptionForm" (ngSubmit)="addSubscription()" class="form-container">
+          <!-- Basic Information -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'displayName'">
+                <mat-label>Display Name (English)</mat-label>
+                <input matInput formControlName="en" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'displayName'">
+                <mat-label>Display Name (Arabic)</mat-label>
+                <input matInput formControlName="ar" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Pricing -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'price'">
+                <mat-label>Price</mat-label>
+                <input matInput formControlName="amount" type="number" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'price'">
+                <mat-label>Currency</mat-label>
+                <input matInput formControlName="currency" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Duration -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'duration'">
+                <mat-label>Duration Value</mat-label>
+                <input matInput formControlName="value" type="number" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'duration'">
+                <mat-label>Duration Unit</mat-label>
+                <input matInput formControlName="unit" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'description'">
+                <mat-label>Description (English)</mat-label>
+                <textarea matInput formControlName="en" rows="3"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'description'">
+                <mat-label>Description (Arabic)</mat-label>
+                <textarea matInput formControlName="ar" rows="3"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="addSubscriptionForm.invalid">
+              Add
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+  <!-- Update Subscription Dialog -->
+  <ng-template #updateSubscriptionDialog>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Update Subscription</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="updateSubscriptionForm" (ngSubmit)="updateSubscription()" class="form-container">
+          <!-- Basic Information -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'displayName'">
+                <mat-label>Display Name (English)</mat-label>
+                <input matInput formControlName="en" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'displayName'">
+                <mat-label>Display Name (Arabic)</mat-label>
+                <input matInput formControlName="ar" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Pricing -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'price'">
+                <mat-label>Price</mat-label>
+                <input matInput formControlName="amount" type="number" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'price'">
+                <mat-label>Currency</mat-label>
+                <input matInput formControlName="currency" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Duration -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'duration'">
+                <mat-label>Duration Value</mat-label>
+                <input matInput formControlName="value" type="number" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'duration'">
+                <mat-label>Duration Unit</mat-label>
+                <input matInput formControlName="unit" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-section">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'description'">
+                <mat-label>Description (English)</mat-label>
+                <textarea matInput formControlName="en" rows="3"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-item" [formGroupName]="'description'">
+                <mat-label>Description (Arabic)</mat-label>
+                <textarea matInput formControlName="ar" rows="3"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="updateSubscriptionForm.invalid">
+              Update
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+</div>

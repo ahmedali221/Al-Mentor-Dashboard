@@ -6,6 +6,8 @@ import { CoursesComponent } from './components/courses/courses.component';
 import { ProgramsComponent } from './components/programs/programs.component';
 import { TopicsComponent } from './components/topics/topics.component';
 import { ProgramDetailsComponent } from './components/program-details/program-details.component';
+import { SubscriptionsComponent } from './components/subscriptions/subscriptions.component';
+import { UserSubscriptionsComponent } from './components/user-subscriptions/user-subscriptions.component';
 
 export const routes: Routes = [
   {
@@ -15,15 +17,17 @@ export const routes: Routes = [
       { path: 'users', component: UsersComponent },
       { path: 'instructors', component: InstructorsComponent },
       { path: 'courses', component: CoursesComponent },
+      { path: 'subscriptions', component: SubscriptionsComponent },
+      { path: 'userSubscriptions', component: UserSubscriptionsComponent },
       {
-        path: 'programs', 
+        path: 'programs',
         children: [
           { path: '', component: ProgramsComponent },
-          { path: ':id', component: ProgramDetailsComponent }
-        ]
+          { path: ':id', component: ProgramDetailsComponent },
+        ],
       },
       { path: 'topics', component: TopicsComponent },
-      { path: '', redirectTo: 'users', pathMatch: 'full' }
-    ]
-  }
+      { path: '', redirectTo: 'users', pathMatch: 'full' },
+    ],
+  },
 ];

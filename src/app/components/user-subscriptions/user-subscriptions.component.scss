@@ -1,0 +1,82 @@
+.user-subscriptions-container {
+  padding: 24px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0;
+      color: var(--text-dark);
+    }
+
+    .add-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .cards-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    mat-card {
+      width: 200px;
+      text-align: center;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      p {
+        margin: 8px 0 0;
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--primary-color);
+      }
+    }
+  }
+
+  .search-container {
+    margin-bottom: 16px;
+
+    .search-field {
+      width: 100%;
+    }
+  }
+
+  mat-card {
+    width: 100%;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      text-align: left;
+      padding: 8px;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+    gap: 16px;
+  }
+
+  .active {
+    color: green;
+  }
+
+  .inactive {
+    color: red;
+  }
+}

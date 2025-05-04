@@ -21,8 +21,8 @@ import { FormsModule } from '@angular/forms';
     MatListModule,
     MatIconModule,
     MatSlideToggleModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class DashboardComponent {
   menuItems = [
@@ -30,7 +30,13 @@ export class DashboardComponent {
     { path: '/instructors', icon: 'school', label: 'Instructors' },
     { path: '/courses', icon: 'book', label: 'Courses' },
     { path: '/programs', icon: 'library_books', label: 'Programs' },
-    { path: '/topics', icon: 'topic', label: 'Topics' }
+    { path: '/topics', icon: 'topic', label: 'Topics' },
+    { path: '/subscriptions', icon: 'subscriptions', label: 'subscriptions' },
+    {
+      path: '/userSubscriptions',
+      icon: 'person_add',
+      label: 'userSubscriptions',
+    },
   ];
 
   isDarkTheme = false;
