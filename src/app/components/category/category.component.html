@@ -1,8 +1,8 @@
 <div class="topics-container">
     <div class="header">
-      <h1>Topics Management</h1>
+      <h1>category Management</h1>
       <button mat-flat-button color="primary" (click)="openAddForm()">
-        <mat-icon>add</mat-icon> Add New Topic
+        <mat-icon>add</mat-icon> Add New category
       </button>
     </div>
   
@@ -12,7 +12,7 @@
         <mat-card-content
         >
           <div>
-            <h3>Total Topics</h3>
+            <h3>Total Categories</h3>
             <p>{{ dataSource?.data?.length || 0 }}</p>
           </div>
         </mat-card-content>
@@ -22,7 +22,7 @@
     <!-- Search Box -->
     <div class="search-box">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Search Topics</mat-label>
+        <mat-label>Search <Canvas></Canvas></mat-label>
         <input matInput [formControl]="searchControl" placeholder="Search by name or slug..." />
         <button *ngIf="searchControl.value" matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
           <mat-icon>close</mat-icon>
@@ -40,41 +40,35 @@
           <!-- Columns -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Name</th>
-            <td mat-cell *matCellDef="let topic">{{ topic.name?.en }}</td>
-          </ng-container>
-  
-          <ng-container matColumnDef="slug">
-            <th mat-header-cell *matHeaderCellDef>Slug</th>
-            <td mat-cell *matCellDef="let topic">{{ topic.slug }}</td>
+            <td mat-cell *matCellDef="let category">{{ category.name?.en }}</td>
           </ng-container>
   
           <ng-container matColumnDef="description">
             <th mat-header-cell *matHeaderCellDef>Description</th>
-            <td mat-cell *matCellDef="let topic">{{ topic.description?.en | slice:0:60 }}...</td>
+            <td mat-cell *matCellDef="let category">{{ category.description?.en }}</td>
           </ng-container>
   
-          <ng-container matColumnDef="languages">
-            <th mat-header-cell *matHeaderCellDef>Languages</th>
-            <td mat-cell *matCellDef="let topic">{{ topic.availableLanguages?.join(', ') }}</td>
-          </ng-container>
   
           <ng-container matColumnDef="order">
             <th mat-header-cell *matHeaderCellDef>Order</th>
-            <td mat-cell *matCellDef="let topic">{{ topic.order }}</td>
+            <td mat-cell *matCellDef="let category">{{ category.order }}</td>
           </ng-container>
-  
-          <ng-container matColumnDef="courseCount">
-            <th mat-header-cell *matHeaderCellDef>Courses</th>
-            <td mat-cell *matCellDef="let topic">{{ topic.courseCount }}</td>
+          <ng-container matColumnDef="categoryCount">
+            <th mat-header-cell *matHeaderCellDef>Category Count</th>
+            <td mat-cell *matCellDef="let category">
+              <!-- Display category count data here -->
+              {{ category.courses?.length || 0 }}
+            </td>
           </ng-container>
+          
   
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let topic">
-              <button mat-icon-button color="primary" (click)="openUpdateForm(topic)">
+            <td mat-cell *matCellDef="let category">
+              <button mat-icon-button color="primary" (click)="openUpdateForm(category)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button color="warn" (click)="deleteTopic(topic._id)">
+              <button mat-icon-button color="warn" (click)="deleteCategory(category._id)">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -92,10 +86,10 @@
   <ng-template #addDialog>
     <mat-card>
       <mat-card-header>
-        <mat-card-title>Add New Topic</mat-card-title>
+        <mat-card-title>Add New category</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <form [formGroup]="addForm" (ngSubmit)="addTopic()" class="topic-form-grid">
+        <form [formGroup]="addForm" (ngSubmit)="addCategory()" class="topic-form-grid">
           <div class="grid-container">
             <!-- Name and Description -->
             <div>
@@ -109,11 +103,6 @@
                   <input matInput formControlName="ar" />
                 </mat-form-field>
               </div>
-  
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Slug</mat-label>
-                <input matInput formControlName="slug" required />
-              </mat-form-field>
   
               <div formGroupName="description">
                 <mat-form-field appearance="outline" class="full-width">
@@ -147,11 +136,6 @@
                 <mat-label>Order</mat-label>
                 <input matInput type="number" formControlName="order" />
               </mat-form-field>
-  
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Course Count</mat-label>
-                <input matInput type="number" formControlName="courseCount" />
-              </mat-form-field>
             </div>
           </div>
   
@@ -172,7 +156,7 @@
         <mat-card-title>Update Topic</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <form [formGroup]="updateForm" (ngSubmit)="updateTopic()" class="topic-form-grid">
+        <form [formGroup]="updateForm" (ngSubmit)="updateCategory()" class="topic-form-grid">
           <div class="grid-container">
             <!-- Same style like Add -->
             <div>
@@ -186,11 +170,6 @@
                   <input matInput formControlName="ar" />
                 </mat-form-field>
               </div>
-  
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Slug</mat-label>
-                <input matInput formControlName="slug" />
-              </mat-form-field>
   
               <div formGroupName="description">
                 <mat-form-field appearance="outline" class="full-width">
@@ -222,11 +201,6 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Order</mat-label>
                 <input matInput type="number" formControlName="order" />
-              </mat-form-field>
-  
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Course Count</mat-label>
-                <input matInput type="number" formControlName="courseCount" />
               </mat-form-field>
             </div>
           </div>

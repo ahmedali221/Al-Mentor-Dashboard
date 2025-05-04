@@ -1,10 +1,11 @@
 export interface Lesson {
+  availableLanguages: any;
  _id: string;
   title: {
     en: string;
     ar: string;
   };
-  module: string;
+  module?: string;
   description?: {
     en?: string;
     ar?: string;

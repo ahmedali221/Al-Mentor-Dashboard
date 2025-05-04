@@ -28,6 +28,7 @@ export class DashboardComponent {
   menuItems = [
     { path: '/users', icon: 'people', label: 'Users' },
     { path: '/instructors', icon: 'school', label: 'Instructors' },
+    { path: '/categories', icon: 'category', label: 'Categories' },
     { path: '/courses', icon: 'book', label: 'Courses' },
     { path: '/lessons', icon: 'check_circle', label: 'Lessons' },
     { path: '/programs', icon: 'library_books', label: 'Programs' },

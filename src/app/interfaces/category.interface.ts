@@ -1,4 +1,4 @@
-export interface CategoryInterface {
+export interface Category {
     _id?: string;
 
     name: {
@@ -15,7 +15,7 @@ export interface CategoryInterface {
   
     topics: string[];      
     subTopics: string[];   
-  
+    courses: string[];
     order: number;
   
     createdAt?: string;   
