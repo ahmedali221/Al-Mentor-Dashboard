@@ -1,0 +1,152 @@
+<div class="program-details-container">
+  <div *ngIf="!loading && !program" class="no-program-message">
+    <p>No program found.</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading && program" class="details-content">
+    <div class="header">
+      <h1>{{ program.title | titlecase }}</h1>
+    </div>
+    <div class="button-group">
+      <button mat-flat-button color="primary" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Programs
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="openUpdateDetailsForm(program)"
+        class="update-button"
+      >
+        <mat-icon>edit</mat-icon>
+        Update Program
+      </button>
+      <button mat-flat-button color="primary" (click)="deleteProgram()">
+        <mat-icon>delete</mat-icon>
+        Remove This Program
+      </button>
+    </div>
+    <div class="cards-row">
+      <mat-card>
+        <mat-card-content>
+          <div>
+            <h3>Total Duration</h3>
+            <p>{{ program.totalDuration }} Hours</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-content>
+          <div>
+            <h3>Level</h3>
+            <p>{{ program.level | titlecase }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-content>
+          <div>
+            <h3>Associated Courses</h3>
+            <p>{{ program.courses.length }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card class="details-card">
+      <mat-card-content>
+        <h2>Program Details</h2>
+        <div class="detail-item">
+          <span class="label">Category:</span>
+          <span>{{ program.category | titlecase }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Language:</span>
+          <span>{{ program.language | titlecase }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Description:</span>
+          <p>{{ program.description }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<ng-template #updateDetailsDialog>
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Update Program</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form
+        [formGroup]="updateForm"
+        (ngSubmit)="updateProgram()"
+        class="program-form-grid"
+      >
+        <div class="grid-container">
+          <div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Title</mat-label>
+              <input matInput formControlName="title" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Slug</mat-label>
+              <input matInput formControlName="slug" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Thumbnail URL</mat-label>
+              <input matInput formControlName="thumbnail" />
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Level</mat-label>
+              <mat-select formControlName="level">
+                <mat-option value="beginner">Beginner</mat-option>
+                <mat-option value="intermediate">Intermediate</mat-option>
+                <mat-option value="advanced">Advanced</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Language</mat-label>
+              <input matInput formControlName="language" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category">
+                <mat-option value="language">Language</mat-option>
+                <mat-option value="business">Business</mat-option>
+                <mat-option value="development">Development</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Total Duration</mat-label>
+              <input matInput type="number" formControlName="totalDuration" />
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="updateForm.invalid"
+          >
+            Update
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

@@ -1,0 +1,84 @@
+.program-details-container {
+  padding: 24px;
+
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .cards-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    mat-card {
+      flex: 1;
+    }
+  }
+
+  .details-card {
+    margin-top: 24px;
+
+    .detail-item {
+      margin-bottom: 16px;
+
+      .label {
+        font-weight: 500;
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+  }
+}
+
+.program-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+  
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}

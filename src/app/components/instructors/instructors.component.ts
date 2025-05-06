@@ -35,6 +35,7 @@ export class InstructorsComponent implements OnInit {
   searchTerm: string = '';
   loading = false;
   error = '';
+  filteredInstructors: Instructor[] = [];
 
   addInstructorForm: FormGroup;
   updateInstructorForm: FormGroup;
@@ -78,8 +79,8 @@ export class InstructorsComponent implements OnInit {
 
     this.instructorsService.getInstructors().subscribe({
       next: (data) => {
-
         this.instructors = data;
+        this.filteredInstructors = [...data]; // Initialize filtered array
         this.loading = false;
       },
       error: (error) => {
@@ -90,11 +91,20 @@ export class InstructorsComponent implements OnInit {
     });
   }
 
-  get filteredInstructors() {
-    return this.instructors.filter(instructor =>
-      instructor.professionalTitle.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      instructor.expertiseAreas.join(' ').toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      instructor.approvalStatus.toLowerCase().includes(this.searchTerm.toLowerCase())
+  applySearchFilter() {
+    if (!this.searchTerm) {
+      this.filteredInstructors = [...this.instructors];
+      return;
+    }
+
+    const query = this.searchTerm.toLowerCase();
+    this.filteredInstructors = this.instructors.filter(instructor =>
+      instructor.professionalTitle.toLowerCase().includes(query) ||
+      (instructor.profile?.firstName?.toLowerCase()?.includes(query)) ||
+      (instructor.profile?.lastName?.toLowerCase()?.includes(query)) ||
+      (instructor.profile?.email?.toLowerCase()?.includes(query)) ||
+      instructor.expertiseAreas.join(' ').toLowerCase().includes(query) ||
+      instructor.approvalStatus.toLowerCase().includes(query)
     );
   }
 
