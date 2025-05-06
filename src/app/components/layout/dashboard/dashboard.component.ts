@@ -31,7 +31,8 @@ export class DashboardComponent {
     { path: '/courses', icon: 'book', label: 'Courses' },
     { path: '/programs', icon: 'library_books', label: 'Programs' },
     { path: '/topics', icon: 'topic', label: 'Topics' },
-    { path: '/payments', icon: 'payment', label: 'Payment' } 
+    { path: '/payments', icon: 'payment', label: 'Payment' } ,
+    { path: '/SubTopics', icon: 'layers', label: 'SubTopics' },
   ];
 
   isDarkTheme = false;
