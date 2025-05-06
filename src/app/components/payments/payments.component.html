@@ -1,0 +1,73 @@
+<div class="payments-container">
+    <h2>Payments</h2>
+  
+    <button mat-raised-button color="primary" (click)="openAddDialog()">
+      Add Payment
+    </button>
+  
+    <table mat-table [dataSource]="payments" class="mat-elevation-z2" style="width:100%;margin:1rem 0">
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef>User</th>
+        <td mat-cell *matCellDef="let p">
+          {{ p.user?.username || p.user }}
+        </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="subscription">
+        <th mat-header-cell *matHeaderCellDef>Subscription</th>
+        <td mat-cell *matCellDef="let p">
+          {{ p.subscription?.displayName?.en || p.subscription }}
+        </td>
+      </ng-container>
+  
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>Amount</th>
+        <td mat-cell *matCellDef="let p">{{ p.amount }}</td>
+      </ng-container>
+  
+      <ng-container matColumnDef="transactionId">
+        <th mat-header-cell *matHeaderCellDef>Transaction Id</th>
+        <td mat-cell *matCellDef="let p">{{ p.transactionId }}</td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  
+    <!-- Dialog for Adding Payment -->
+    <ng-template #paymentDialog>
+        <div class="dialog-container">
+          <h2 class="dialog-title">Add Payment</h2>
+          <form [formGroup]="paymentForm" (ngSubmit)="savePayment()" class="payment-form">
+      
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>User</mat-label>
+              <mat-select formControlName="userId">
+                <mat-option *ngFor="let user of userList" [value]="user._id">{{ user.username }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Subscription</mat-label>
+              <mat-select formControlName="subscriptionName">
+                <mat-option *ngFor="let sub of subscriptionList" [value]="sub.name">{{ sub.displayName.en }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+      
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Amount</mat-label>
+              <input matInput formControlName="amount" type="number">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Transaction ID</mat-label>
+              <input matInput formControlName="transactionId">
+            </mat-form-field>
+      
+            <div class="dialog-actions">
+              <button mat-raised-button color="primary" type="submit" [disabled]="paymentForm.invalid">Save</button>
+            </div>
+          </form>
+        </div>
+      </ng-template>
+  </div>
