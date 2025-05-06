@@ -1,6 +1,5 @@
 import { Course } from "./course";
 
-// ... existing code ...
 export interface program {
     _id: string;
     title: string;

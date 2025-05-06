@@ -11,6 +11,7 @@
   --sidebar-text: #ffffff;
   --toolbar-bg: #ffffff;
   --toolbar-text: #000000;
+  --border-color: #e0e0e0; // Light theme border color
 }
 
 .dark-theme {
@@ -20,6 +21,7 @@
   --sidebar-text: #ffffff;
   --toolbar-bg: #1e1e1e;
   --toolbar-text: #ffffff;
+  --border-color: #424242; // Dark theme border color
 }
 
 html,
@@ -60,6 +62,27 @@ mat-card,
 .mat-mdc-icon-button {
   &.mat-primary {
     color: var(--primary-color) !important;
+  }
+}
+.custom-slide-toggle {
+  &.mat-checked {
+    .mat-slide-toggle-thumb {
+      background-color: #3f51b5; // Your primary color
+    }
+
+    .mat-slide-toggle-bar {
+      background-color: rgba(63, 81, 181, 0.54); // Lighter version of primary
+    }
+  }
+
+  &:not(.mat-checked) {
+    .mat-slide-toggle-thumb {
+      background-color: #f5f5f5;
+    }
+
+    .mat-slide-toggle-bar {
+      background-color: rgba(0, 0, 0, 0.38);
+    }
   }
 }
 

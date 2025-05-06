@@ -21,6 +21,15 @@ export class ProgramsService {
     return this.http.post<program>(this.apiUrl, program);
   }
 
+  getProgramById(id: string): Observable<program> {
+    return this.http.get<program>(`${this.apiUrl}/${id}`);
+  }
+
+  getProgramByCategory(category: string): Observable<program[]> {
+    const url = `${this.apiUrl}?category=${category}`;
+    return this.http.get<program[]>(url);
+  }
+
   updateProgram(program: program): Observable<program> {
     const url = `${this.apiUrl}/${program._id}`;
     return this.http.put<program>(url, program);

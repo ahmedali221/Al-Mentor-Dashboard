@@ -1,0 +1,52 @@
+::ng-deep .mat-dialog-container {
+  border-radius: 16px;
+  padding: 0 !important;
+  box-shadow: 0 12px 48px 0 rgba(30, 34, 40, 0.18);
+}
+
+.dialog-container {
+  background: #f8f9fa;
+  padding: 28px 26px 18px 26px;
+  min-width: 350px;
+  border-radius: 16px;
+
+  .dialog-title {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #000000;
+    letter-spacing: 0.02rem;
+  }
+
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    .full-width {
+      width: 100%;
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+    margin-bottom: 4px;
+
+    button[mat-raised-button] {
+      min-width: 110px;
+      border-radius: 24px;
+      font-weight: 600;
+      text-transform: capitalize;
+      background: linear-gradient(90deg, #eb2027 20%, #eb2027cb 90%);
+      color: #fff;
+      box-shadow: 0 2px 12px 0 rgba(25, 118, 210, 0.06);
+
+      &:hover, &:focus {
+        background: linear-gradient(90deg, #eb2027 20%, #eb2027d0 90%);
+      }
+    }
+  }
+}

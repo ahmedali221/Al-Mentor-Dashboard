@@ -1,5 +1,8 @@
 export interface Topic {
+<<<<<<< HEAD
 title: any;
+=======
+>>>>>>> main
   _id?: string;
 
   name: {
@@ -17,4 +20,8 @@ title: any;
   courseCount: number;
   createdAt?: string;
   updatedAt?: string;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

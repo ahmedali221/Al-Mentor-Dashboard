@@ -6,23 +6,34 @@ import { CoursesComponent } from './components/courses/courses.component';
 import { ProgramsComponent } from './components/programs/programs.component';
 import { TopicsComponent } from './components/topics/topics.component';
 import { CLessonsComponent } from './components/lessons/lessons.component';
-import{ SubTopicsComponent }from './components/sub-topics/sub-topics.component'
 import { CategoryComponent } from './components/category/category.component';
+import { ProgramDetailsComponent } from './components/program-details/program-details.component';
+import { PaymentsComponent } from './components/payments/payments.component';
+import { SubTopicsComponent } from './components/sub-topics/sub-topics.component';
+
 
 export const routes: Routes = [
-    {
-        path: '',
-        component: DashboardComponent,
+  {
+    path: '',
+    component: DashboardComponent,
+    children: [
+      { path: 'users', component: UsersComponent },
+      { path: 'instructors', component: InstructorsComponent },
+      { path: 'courses', component: CoursesComponent },
+      { path: 'lessons', component: CLessonsComponent },
+      { path: 'programs', component: ProgramsComponent },
+      {
+        path: 'programs',
         children: [
-            { path: 'users', component: UsersComponent },
-            { path: 'instructors', component: InstructorsComponent },
-            { path: 'courses', component: CoursesComponent },
-            { path: 'lessons', component: CLessonsComponent },
-            { path: 'programs', component: ProgramsComponent },
-            { path: 'topics', component: TopicsComponent },
-            {path:'sub-topics' ,component:SubTopicsComponent},
-            {path: 'categories', component: CategoryComponent },
-            { path: '', redirectTo: 'users', pathMatch: 'full' }
+          { path: '', component: ProgramsComponent },
+          { path: ':id', component: ProgramDetailsComponent }
         ]
-    }
+      },
+      { path: 'topics', component: TopicsComponent },
+      { path: 'sub-topics', component: SubTopicsComponent },
+      { path: 'categories', component: CategoryComponent },
+      { path: '', redirectTo: 'users', pathMatch: 'full' }
+    ]
+  }
+
 ];

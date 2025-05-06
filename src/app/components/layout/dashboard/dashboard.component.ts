@@ -26,17 +26,25 @@ import { FormsModule } from '@angular/forms';
 })
 export class DashboardComponent {
   menuItems = [
+    // Users
     { path: '/users', icon: 'people', label: 'Users' },
     { path: '/instructors', icon: 'school', label: 'Instructors' },
+
+    // Courses & Categories
     { path: '/categories', icon: 'category', label: 'Categories' },
+    { path: '/topics', icon: 'topic', label: 'Topics' },
+    { path: '/SubTopics', icon: 'layers', label: 'SubTopics' },
     { path: '/courses', icon: 'book', label: 'Courses' },
     { path: '/lessons', icon: 'check_circle', label: 'Lessons' },
+
+    // Programs
     { path: '/programs', icon: 'library_books', label: 'Programs' },
-    { path: '/topics', icon: 'topic', label: 'Topics' },
-    {path:'/sub-topics', icon:'book',label:'SubTopics'}
+
+    // Payments
+    { path: '/payments', icon: 'payment', label: 'Payment' },
   ];
 
-  isDarkTheme = true;
+  isDarkTheme = false;
 
   toggleTheme() {
     document.body.classList.toggle('dark-theme', this.isDarkTheme);

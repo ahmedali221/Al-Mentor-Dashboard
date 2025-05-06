@@ -10,7 +10,7 @@ import { Subtopics } from '../interfaces/subtopics';
 export class SubtopicsService {
   private apiUrl = `${environment.apiUrl}/subtopics`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getSubTopicsByTopic(topicId: string): Observable<Subtopics[]> {
     return this.http.get<Subtopics[]>(`${this.apiUrl}/topic/${topicId}`);
@@ -19,7 +19,7 @@ export class SubtopicsService {
   getAllSubTopics(): Observable<Subtopics[]> {
     return this.http.get<Subtopics[]>(this.apiUrl);
   }
- 
+
   getSubTopicById(id: string): Observable<Subtopics> {
     return this.http.get<Subtopics>(`${this.apiUrl}/${id}`);
   }

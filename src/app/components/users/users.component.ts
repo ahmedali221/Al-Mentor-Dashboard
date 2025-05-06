@@ -59,19 +59,34 @@ export class UsersComponent implements OnInit {
     this.loadUsers();
   }
 
+  searchQuery: string = '';
+  filteredUsers: User[] = [];
+
+  applySearchFilter() {
+    if (!this.searchQuery) {
+      this.filteredUsers = [...this.users];
+      return;
+    }
+
+    const query = this.searchQuery.toLowerCase();
+    this.filteredUsers = this.users.filter(user =>
+      user.firstName?.toLowerCase().includes(query) ||
+      user.lastName?.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query) ||
+      user.username.toLowerCase().includes(query)
+    );
+  }
+
   loadUsers() {
     this.usersService.getUsers().subscribe(users => {
       this.users = users;
+      this.filteredUsers = [...users];
     });
   }
-
-  // ... existing code ...
 
   get totalStudents(): number {
     return this.users.length;
   }
-
-
 
 
   deleteUser(userId: string) {
