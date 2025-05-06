@@ -89,7 +89,6 @@ export class ProgramDetailsComponent implements OnInit {
 
 
 
-  // this is a new commit
   updateProgram(): void {
     if (this.updateForm.valid) {
       const updatedProgram = { ...this.selectedProgram, ...this.updateForm.value };
