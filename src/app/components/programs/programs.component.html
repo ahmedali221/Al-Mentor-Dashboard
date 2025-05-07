@@ -44,9 +44,12 @@
     <mat-card-content>
       <mat-chip-listbox>
         @for (field of programFields; track field) {
-        <mat-chip-option color="primary" selected (click)="onFieldClick(field)">{{
-          field | titlecase
-        }}</mat-chip-option>
+        <mat-chip-option 
+          [color]="selectedField === field ? 'accent' : 'primary'"
+          [selected]="selectedField === field"
+          (click)="onFieldClick(field)">
+          {{ field | titlecase }}
+        </mat-chip-option>
         }
       </mat-chip-listbox>
     </mat-card-content>
