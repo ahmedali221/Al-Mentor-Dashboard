@@ -4,10 +4,16 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { User } from '../interfaces/user.interface';
 
+
+
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
+  getInstructors(): Observable<User[]> {
+    // Replace with the actual implementation that returns an observable
+    return this.http.get<User[]>('api/instructors');
+  }
   private apiUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) { }

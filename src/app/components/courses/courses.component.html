@@ -1,48 +1,250 @@
 <div class="courses-container">
   <div class="header">
     <h1>Courses Management</h1>
-    <button mat-flat-button color="primary">
+    <button mat-flat-button color="primary" (click)="openAddForm()">
       <mat-icon>add</mat-icon>
-      Add New Instructor
+      Add New Course
     </button>
   </div>
 
-  <mat-card>
-    <mat-card-content>
-      <table mat-table [dataSource]="courses">
-        <mat-text-column name="title"></mat-text-column>
-        <mat-text-column name="language"></mat-text-column>
-        <ng-container matColumnDef="instructor">
-          <th mat-header-cell *matHeaderCellDef>Instructor Name</th>
-          <td mat-cell *matCellDef="let course">
-            {{ course.instructorDetails.profile.firstName }}
-            {{ course.instructorDetails.profile.lastName }}
-          </td>
-        </ng-container>
-        <mat-text-column name="level"></mat-text-column>
-        <ng-container matColumnDef="enrollmentCount">
-          <th mat-header-cell *matHeaderCellDef>Enrollement Count</th>
-          <td mat-cell *matCellDef="let course">
-            {{ course.enrollmentCount }}
-            <span>Stuents</span>
-          </td>
-        </ng-container>
+  <div class="stats-container">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon">book</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalCourses }}</span>
+            <span class="stat-label">Total Courses</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
-        <ng-container matColumnDef="duration">
-          <th mat-header-cell *matHeaderCellDef>Total Duration</th>
-          <td mat-cell *matCellDef="let course">
-            {{ course.duration }} <small>Hours</small>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="rating">
-          <th mat-header-cell *matHeaderCellDef>Rating</th>
-          <td mat-cell *matCellDef="let course">
-            {{ course.rating.average }}
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let myRowData; columns: displayedColumns"></tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon">check_circle</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ activeCourses }}</span>
+            <span class="stat-label">Active Courses</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Search Courses</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Enter course name or slug">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Filter by Topic</mat-label>
+      <mat-select [formControl]="selectedTopic">
+        <mat-option value="">All Topics</mat-option>
+        <mat-option *ngFor="let topic of topics" [value]="topic._id">
+          {{ topic.title?.en }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" (click)="clearFilters()">Clear Filters</button>
+  </div>
+
+  <!-- Course Table -->
+  <div *ngIf="filteredCourses.length > 0; else noCourses">
+    <table mat-table [dataSource]="filteredCourses" class="mat-elevation-z1 full-width">
+      
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Title</th>
+        <td mat-cell *matCellDef="let course">{{ course.title?.en }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="instructorName">
+        <th mat-header-cell *matHeaderCellDef>Instructor</th>
+        <td mat-cell *matCellDef="let course">{{ course.instructor }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="slug">
+        <th mat-header-cell *matHeaderCellDef>Slug</th>
+        <td mat-cell *matCellDef="let course">{{ course.slug }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="availableLanguages">
+        <th mat-header-cell *matHeaderCellDef>Languages</th>
+        <td mat-cell *matCellDef="let course">{{ course.availableLanguages?.join(', ') || 'N/A' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="lessonsCount">
+        <th mat-header-cell *matHeaderCellDef>Lessons</th>
+        <td mat-cell *matCellDef="let course">{{ course.lessons?.length || 0 }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let course">
+          <button mat-icon-button color="primary" (click)="openUpdateForm(course)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteCourse(course._id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- No Courses Message -->
+  <ng-template #noCourses>
+    <div class="no-courses">
+      <p>No courses found. Try changing filters or add a new one.</p>
+    </div>
+  </ng-template>
+
+  <!-- ADD COURSE DIALOG -->
+  <ng-template #addDialog>
+    <h2 mat-dialog-title>Add New Course</h2>
+    <mat-dialog-content [formGroup]="addForm">
+      <div class="form-grid">
+        <div formGroupName="title">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title (EN)</mat-label>
+            <input matInput formControlName="en" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title (AR)</mat-label>
+            <input matInput formControlName="ar" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Slug</mat-label>
+          <input matInput formControlName="slug" required />
+        </mat-form-field>
+
+        <div formGroupName="description">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description (EN)</mat-label>
+            <textarea matInput formControlName="en" required></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description (AR)</mat-label>
+            <textarea matInput formControlName="ar"></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Topic</mat-label>
+          <mat-select formControlName="topicId" required>
+            <mat-option *ngFor="let topic of topics" [value]="topic._id">
+              {{ topic.title?.en }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field> -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Topic</mat-label>
+          <input matInput formControlName="topicId" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Instructor</mat-label>
+          <input matInput formControlName="instructor" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Thumbnail URL</mat-label>
+          <input matInput formControlName="thumbnailImgUrl" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Languages</mat-label>
+          <mat-select formControlName="availableLanguages" multiple>
+            <mat-option value="en">English</mat-option>
+            <mat-option value="ar">Arabic</mat-option>
+            <mat-option value="fr">French</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="closeDialog()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="addNewCourse()" [disabled]="addForm.invalid">Add</button>
+    </mat-dialog-actions>
+  </ng-template>
+
+  <!-- UPDATE COURSE DIALOG -->
+  <ng-template #updateDialog>
+    <h2 mat-dialog-title>Update Course</h2>
+    <mat-dialog-content [formGroup]="updateForm">
+      <div class="form-grid">
+        <div formGroupName="title">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title (EN)</mat-label>
+            <input matInput formControlName="en" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title (AR)</mat-label>
+            <input matInput formControlName="ar" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Slug</mat-label>
+          <input matInput formControlName="slug" required />
+        </mat-form-field>
+
+        <div formGroupName="description">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description (EN)</mat-label>
+            <textarea matInput formControlName="en" required></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description (AR)</mat-label>
+            <textarea matInput formControlName="ar"></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Topic</mat-label>
+          <mat-select formControlName="topicId" required>
+            <mat-option *ngFor="let topic of topics" [value]="topic._id">
+              {{ topic.title?.en }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field> -->
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Topic</mat-label>
+          <input matInput formControlName="topicId" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Instructor</mat-label>
+          <input matInput formControlName="instructor" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Thumbnail URL</mat-label>
+          <input matInput formControlName="thumbnailImgUrl" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Languages</mat-label>
+          <mat-select formControlName="availableLanguages" multiple>
+            <mat-option value="en">English</mat-option>
+            <mat-option value="ar">Arabic</mat-option>
+            <mat-option value="fr">French</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="closeDialog()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="updateCourse()" [disabled]="updateForm.invalid">Update</button>
+    </mat-dialog-actions>
+  </ng-template>
 </div>
