@@ -30,7 +30,8 @@ export const routes: Routes = [
         ]
       },
       { path: 'topics', component: TopicsComponent },
-      { path: 'sub-topics', component: SubTopicsComponent },
+      { path: 'payments', component: PaymentsComponent },
+      { path: 'SubTopics', component: SubTopicsComponent },
       { path: 'categories', component: CategoryComponent },
       { path: '', redirectTo: 'users', pathMatch: 'full' }
     ]
