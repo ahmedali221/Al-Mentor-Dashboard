@@ -1,7 +1,9 @@
 export interface Payment {
   _id?: string;
   user: string | { _id: string; username: string };
-  subscription: string | { _id: string; name: string };
+  subscription: string | {
+    displayName: any; _id: string; name: string
+  };
   amount: number;
   currency?: string;
   transactionId: string;

@@ -14,6 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { Router } from '@angular/router';
+import { CategoryService } from '../../services/category.service';
 
 
 @Component({
@@ -36,7 +37,8 @@ import { Router } from '@angular/router';
   styleUrl: './programs.component.scss'
 })
 export class ProgramsComponent {
-  readonly programFields: string[] = ['technology', 'business', 'language'];
+
+  programFields: string[] = [];
   displayedColumns: string[] = ['title', 'level', 'language', 'category', 'totalDuration', 'Courses', 'actions'];
   programs: program[] = [];
   addForm: FormGroup;
@@ -46,6 +48,7 @@ export class ProgramsComponent {
 
   constructor(
     private programService: ProgramsService,
+    private categoriesService: CategoryService, // Add this
     private fb: FormBuilder,
     private dialog: MatDialog,
     private router: Router // Add this
@@ -75,8 +78,20 @@ export class ProgramsComponent {
 
   ngOnInit() {
     this.loadPrograms();
+    this.loadCategories(); // Add this
   }
 
+  // Add this method
+  loadCategories() {
+    this.categoriesService.getCategories().subscribe({
+      next: (categories) => {
+        this.programFields = categories.map(category => category.name.en);
+      },
+      error: (error) => {
+        console.error('Failed to load categories:', error);
+      }
+    });
+  }
   searchQuery: string = '';
   filteredPrograms: program[] = [];
 
@@ -85,15 +100,16 @@ export class ProgramsComponent {
 
     if (this.selectedField) {
       filtered = filtered.filter(program =>
-        program.category.toLowerCase() === this.selectedField?.toLowerCase()
+        program.category.en.toLowerCase() === this.selectedField?.toLowerCase()
       );
     }
 
+    // Filter by search query
     if (this.searchQuery) {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(program =>
-        program.title.toLowerCase().includes(query) ||
-        program.category.toLowerCase().includes(query) ||
+        program.title.en.toLowerCase().includes(query) ||
+        program.category.en.toLowerCase().includes(query) ||
         program.language.toLowerCase().includes(query)
       );
     }
@@ -145,12 +161,7 @@ export class ProgramsComponent {
     }
   }
 
-  getTotalICourses(): number {
-    if (!this.programs) return 0;
-    return this.programs.reduce((total, program) => {
-      return total + (program.coursesDetails?.length || 0);
-    }, 0);
-  }
+
 
   @ViewChild('addDialog') addDialog!: TemplateRef<any>;
 
@@ -181,14 +192,12 @@ export class ProgramsComponent {
 
   onFieldClick(field: string) {
     if (this.selectedField === field) {
-      // If clicking the already selected field, reset the filter
       this.selectedField = null;
       this.filteredPrograms = [...this.programs];
     } else {
-      // Filter by the selected category
       this.selectedField = field;
       this.filteredPrograms = this.programs.filter(program =>
-        program.category.toLowerCase() === field.toLowerCase()
+        program.category.en.toLowerCase() === field.toLowerCase()
       );
     }
   }

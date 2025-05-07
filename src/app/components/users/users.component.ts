@@ -70,8 +70,8 @@ export class UsersComponent implements OnInit {
 
     const query = this.searchQuery.toLowerCase();
     this.filteredUsers = this.users.filter(user =>
-      user.firstName?.toLowerCase().includes(query) ||
-      user.lastName?.toLowerCase().includes(query) ||
+      user.firstName?.en.toLowerCase().includes(query) ||
+      user.lastName?.en.toLowerCase().includes(query) ||
       user.email.toLowerCase().includes(query) ||
       user.username.toLowerCase().includes(query)
     );

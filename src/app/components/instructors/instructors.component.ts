@@ -69,8 +69,8 @@ export class InstructorsComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log("Getting the data");
     this.loadInstructors();
+
   }
 
   loadInstructors() {
@@ -82,6 +82,8 @@ export class InstructorsComponent implements OnInit {
         this.instructors = data;
         this.filteredInstructors = [...data]; // Initialize filtered array
         this.loading = false;
+        console.log(this.instructors)
+
       },
       error: (error) => {
         this.error = 'Failed to load instructors';
@@ -99,12 +101,12 @@ export class InstructorsComponent implements OnInit {
 
     const query = this.searchTerm.toLowerCase();
     this.filteredInstructors = this.instructors.filter(instructor =>
-      instructor.professionalTitle.toLowerCase().includes(query) ||
-      (instructor.profile?.firstName?.toLowerCase()?.includes(query)) ||
-      (instructor.profile?.lastName?.toLowerCase()?.includes(query)) ||
-      (instructor.profile?.email?.toLowerCase()?.includes(query)) ||
-      instructor.expertiseAreas.join(' ').toLowerCase().includes(query) ||
-      instructor.approvalStatus.toLowerCase().includes(query)
+      (instructor.profile.firstName?.en?.toLowerCase().includes(query) || '') ||
+      (instructor.profile.lastName?.en?.toLowerCase().includes(query) || '') ||
+      (instructor.profile.email?.toLowerCase().includes(query) || '') ||
+      (instructor.professionalTitle?.en?.toLowerCase().includes(query) || '') ||
+      (Array.isArray(instructor.expertiseAreas?.en) && instructor.expertiseAreas.en.join(' ').toLowerCase().includes(query)) ||
+      (instructor.approvalStatus?.toLowerCase().includes(query) || '')
     );
   }
 
@@ -135,7 +137,7 @@ export class InstructorsComponent implements OnInit {
     this.updateInstructorForm.patchValue({
       user: instructor.user,
       professionalTitle: instructor.professionalTitle,
-      expertiseAreas: instructor.expertiseAreas.join(', '),
+      expertiseAreas: instructor.expertiseAreas,
       biography: instructor.biography,
       approvalStatus: instructor.approvalStatus
     });

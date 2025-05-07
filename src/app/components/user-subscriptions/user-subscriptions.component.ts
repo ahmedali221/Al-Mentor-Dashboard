@@ -78,6 +78,7 @@ export class UserSubscriptionsComponent implements OnInit {
       next: (subscriptions) => {
         this.userSubscriptions = subscriptions;
         this.filteredUserSubscriptions = [...subscriptions];
+        console.log(subscriptions);
       },
       error: () => (this.error = 'Failed to load user subscriptions'),
     });
@@ -162,6 +163,7 @@ export class UserSubscriptionsComponent implements OnInit {
       .subscribe({
         next: () => {
           subscription.status = newStatus;
+          console.log(subscription.status)
         },
         error: (error) => {
           console.error('Error toggling subscription status:', error);

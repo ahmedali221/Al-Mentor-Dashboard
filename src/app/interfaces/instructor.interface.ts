@@ -1,17 +1,19 @@
+import { MultilingualString } from "./multilingual-string.interface";
+
 interface Profile {
-  firstName: string;
-  lastName: string;
+  firstName: MultilingualString;
+  lastName: MultilingualString;
   email: string;
   profilePicture: string;
 }
 
 export interface Instructor {
-name: any;
+  name: MultilingualString;
   _id: string;
   user: string;
-  professionalTitle: string;
-  expertiseAreas: string[];
-  biography: string;
+  professionalTitle: MultilingualString;
+  expertiseAreas: { en: string[]; ar?: string[] };
+  biography: MultilingualString;
   socialMediaLinks?: {
     linkedin?: string;
     twitter?: string;
@@ -20,5 +22,5 @@ name: any;
   };
   yearsOfExperience?: number;
   approvalStatus: 'pending' | 'approved' | 'rejected';
-  profile?: Profile;
+  profile: Profile;
 }
