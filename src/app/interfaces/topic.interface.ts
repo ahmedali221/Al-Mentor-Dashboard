@@ -1,18 +1,15 @@
 export interface Topic {
-<<<<<<< HEAD
-title: any;
-=======
->>>>>>> main
+  title: any;
   _id?: string;
 
   name: {
     en: string;
-    ar?: string; 
+    ar?: string;
   };
   slug: string;
   description: {
     en: string;
-    ar?: string; 
+    ar?: string;
   };
   thumbnailImgUrl: string;
   availableLanguages: string[];
@@ -20,8 +17,4 @@ title: any;
   courseCount: number;
   createdAt?: string;
   updatedAt?: string;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

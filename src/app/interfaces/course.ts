@@ -1,12 +1,12 @@
 
 export interface Course {
   courseCount: number;
-  instructor: string ;
-  topic: string ;
-  isFree: boolean ;
+  instructor: string;
+  topic: string;
+  isFree: boolean;
   duration: number;
-  language: string ;
-  level: string ;
+  language: string;
+  level: string;
   lessonsCount: number;
   name: any;
   _id: string;
@@ -30,7 +30,6 @@ export interface Course {
   instructorName: string;
 }
 
-// Define column interface for dynamic table rendering
 export interface TableColumn {
   prop: string;
   name: string;

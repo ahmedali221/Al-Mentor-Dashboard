@@ -28,7 +28,6 @@ export const routes: Routes = [
       { path: 'userSubscriptions', component: UserSubscriptionsComponent },
       {
         path: 'programs',
-        path: 'programs',
         children: [
           { path: '', component: ProgramsComponent },
           { path: ':id', component: ProgramDetailsComponent },
@@ -39,9 +38,7 @@ export const routes: Routes = [
       { path: 'categories', component: CategoryComponent },
       { path: '', redirectTo: 'users', pathMatch: 'full' }
     ]
-  }
-
-      { path: '', redirectTo: 'users', pathMatch: 'full' },
-],
   },
-];
+
+]
+
