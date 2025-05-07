@@ -11,6 +11,8 @@ import { ProgramDetailsComponent } from './components/program-details/program-de
 import { PaymentsComponent } from './components/payments/payments.component';
 import { SubTopicsComponent } from './components/sub-topics/sub-topics.component';
 
+import { SubscriptionsComponent } from './components/subscriptions/subscriptions.component';
+import { UserSubscriptionsComponent } from './components/user-subscriptions/user-subscriptions.component';
 
 export const routes: Routes = [
   {
@@ -22,12 +24,15 @@ export const routes: Routes = [
       { path: 'courses', component: CoursesComponent },
       { path: 'lessons', component: CLessonsComponent },
       { path: 'programs', component: ProgramsComponent },
+      { path: 'subscriptions', component: SubscriptionsComponent },
+      { path: 'userSubscriptions', component: UserSubscriptionsComponent },
       {
+        path: 'programs',
         path: 'programs',
         children: [
           { path: '', component: ProgramsComponent },
-          { path: ':id', component: ProgramDetailsComponent }
-        ]
+          { path: ':id', component: ProgramDetailsComponent },
+        ],
       },
       { path: 'topics', component: TopicsComponent },
       { path: 'sub-topics', component: SubTopicsComponent },
@@ -36,4 +41,7 @@ export const routes: Routes = [
     ]
   }
 
+      { path: '', redirectTo: 'users', pathMatch: 'full' },
+],
+  },
 ];

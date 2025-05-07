@@ -21,8 +21,8 @@ import { FormsModule } from '@angular/forms';
     MatListModule,
     MatIconModule,
     MatSlideToggleModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class DashboardComponent {
   menuItems = [
@@ -39,6 +39,13 @@ export class DashboardComponent {
 
     // Programs
     { path: '/programs', icon: 'library_books', label: 'Programs' },
+    { path: '/topics', icon: 'topic', label: 'Topics' },
+    { path: '/subscriptions', icon: 'subscriptions', label: 'subscriptions' },
+    {
+      path: '/userSubscriptions',
+      icon: 'person_add',
+      label: 'userSubscriptions',
+    },
 
     // Payments
     { path: '/payments', icon: 'payment', label: 'Payment' },
