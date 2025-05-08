@@ -155,18 +155,23 @@ export class UserSubscriptionsComponent implements OnInit {
       return;
     }
 
+    const action = subscription.status === 'active' ? 'cancel' : 'activate';
     const newStatus = subscription.status === 'active' ? 'canceled' : 'active';
 
     this.userSubscriptionsService
-      .toggleSubscriptionStatus(subscription._id, newStatus)
+      .toggleSubscriptionStatus(subscription._id, action)
       .subscribe({
         next: () => {
+          // Update the status locally without reloading
           subscription.status = newStatus;
+          this.filteredUserSubscriptions = [...this.userSubscriptions];
         },
         error: (error) => {
-          console.error('Error toggling subscription status:', error);
-          this.error =
-            'Failed to toggle subscription status. Please try again later.';
+          console.error(
+            `Error toggling subscription status to ${action}:`,
+            error
+          );
+          this.error = `Failed to ${action} subscription status. Please try again later.`;
         },
       });
   }

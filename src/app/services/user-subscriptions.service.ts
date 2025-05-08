@@ -76,21 +76,22 @@ export class UserSubscriptionsService {
 
   toggleSubscriptionStatus(
     id: string,
-    currentStatus: 'active' | 'canceled'
+    action: 'activate' | 'cancel'
   ): Observable<UserSubscriptions> {
     if (!id) {
       console.error('ID is required for toggling status');
       return throwError(() => new Error('ID is required'));
     }
 
-    const newStatus = currentStatus === 'active' ? 'canceled' : 'active';
-    const url = `http://localhost:5000/api/user-subscriptions/cancel/${id}`;
+    const url = `http://localhost:5000/api/user-subscriptions/${action}/${id}`;
 
-    return this.http.put<UserSubscriptions>(url, { status: newStatus }).pipe(
+    return this.http.put<UserSubscriptions>(url, {}).pipe(
       catchError((error) => {
         return throwError(
           () =>
-            new Error(error.message || 'Failed to toggle subscription status')
+            new Error(
+              error.message || `Failed to ${action} subscription status`
+            )
         );
       })
     );
