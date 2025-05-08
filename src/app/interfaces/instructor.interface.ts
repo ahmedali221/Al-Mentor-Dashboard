@@ -6,6 +6,7 @@ interface Profile {
 }
 
 export interface Instructor {
+name: any;
   _id: string;
   user: string;
   professionalTitle: string;

@@ -42,6 +42,7 @@ export class ProgramsComponent {
   addForm: FormGroup;
   updateForm: FormGroup;
   selectedProgram: any;
+  selectedField: string | null = null;
 
   constructor(
     private programService: ProgramsService,
@@ -80,20 +81,26 @@ export class ProgramsComponent {
   filteredPrograms: program[] = [];
 
   applySearchFilter() {
-    if (!this.searchQuery) {
-      this.filteredPrograms = [...this.programs];
-      return;
+    let filtered = [...this.programs];
+
+    if (this.selectedField) {
+      filtered = filtered.filter(program =>
+        program.category.toLowerCase() === this.selectedField?.toLowerCase()
+      );
     }
 
-    const query = this.searchQuery.toLowerCase();
-    this.filteredPrograms = this.programs.filter(program =>
-      program.title.toLowerCase().includes(query) ||
-      program.category.toLowerCase().includes(query) ||
-      program.language.toLowerCase().includes(query)
-    );
+    if (this.searchQuery) {
+      const query = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(program =>
+        program.title.toLowerCase().includes(query) ||
+        program.category.toLowerCase().includes(query) ||
+        program.language.toLowerCase().includes(query)
+      );
+    }
+
+    this.filteredPrograms = filtered;
   }
 
-  // Update your loadPrograms method
   loadPrograms() {
     this.programService.getPrograms().subscribe({
       next: (data) => {
@@ -173,13 +180,17 @@ export class ProgramsComponent {
   }
 
   onFieldClick(field: string) {
-    this.programService.getPrograms().subscribe({
-      next: (allPrograms) => {
-        this.programs = allPrograms.filter(program =>
-          program.category.toLowerCase() === field.toLowerCase()
-        );
-      }
-    });
+    if (this.selectedField === field) {
+      // If clicking the already selected field, reset the filter
+      this.selectedField = null;
+      this.filteredPrograms = [...this.programs];
+    } else {
+      // Filter by the selected category
+      this.selectedField = field;
+      this.filteredPrograms = this.programs.filter(program =>
+        program.category.toLowerCase() === field.toLowerCase()
+      );
+    }
   }
 
   // Add this method
