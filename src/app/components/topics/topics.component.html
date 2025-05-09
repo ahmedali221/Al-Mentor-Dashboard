@@ -6,14 +6,12 @@
     </button>
   </div>
 
-
   <div class="cards-row">
     <mat-card>
-      <mat-card-content
-      >
+      <mat-card-content>
         <div>
           <h3>Total Topics</h3>
-          <p>{{ dataSource?.data?.length || 0 }}</p>
+          <p>{{ dataSource.data.length || 0 }}</p>
         </div>
       </mat-card-content>
     </mat-card>
@@ -23,8 +21,18 @@
   <div class="search-box">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Search Topics</mat-label>
-      <input matInput [formControl]="searchControl" placeholder="Search by name or slug..." />
-      <button *ngIf="searchControl.value" matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Search by name or slug..."
+      />
+      <button
+        *ngIf="searchControl.value"
+        matSuffix
+        mat-icon-button
+        aria-label="Clear"
+        (click)="clearSearch()"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
@@ -36,7 +44,12 @@
         <mat-spinner diameter="40"></mat-spinner>
       </div>
 
-      <table mat-table [dataSource]="dataSource" *ngIf="!isLoading" class="mat-elevation-z1">
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        *ngIf="!isLoading"
+        class="mat-elevation-z1"
+      >
         <!-- Columns -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -45,17 +58,21 @@
 
         <ng-container matColumnDef="slug">
           <th mat-header-cell *matHeaderCellDef>Slug</th>
-          <td mat-cell *matCellDef="let topic">{{ topic.slug }}</td>
+          <td mat-cell *matCellDef="let topic">{{ topic.slug.en }}</td>
         </ng-container>
 
         <ng-container matColumnDef="description">
           <th mat-header-cell *matHeaderCellDef>Description</th>
-          <td mat-cell *matCellDef="let topic">{{ topic.description?.en | slice:0:60 }}...</td>
+          <td mat-cell *matCellDef="let topic">
+            {{ topic.description?.en | slice : 0 : 60 }}...
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="languages">
           <th mat-header-cell *matHeaderCellDef>Languages</th>
-          <td mat-cell *matCellDef="let topic">{{ topic.availableLanguages?.join(', ') }}</td>
+          <td mat-cell *matCellDef="let topic">
+            {{ topic.availableLanguages?.join(", ") }}
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="order">
@@ -71,10 +88,18 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let topic">
-            <button mat-icon-button color="primary" (click)="openUpdateForm(topic)">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="openUpdateForm(topic)"
+            >
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="deleteTopic(topic._id)">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteTopic(topic._id)"
+            >
               <mat-icon>delete</mat-icon>
             </button>
           </td>
@@ -95,7 +120,11 @@
       <mat-card-title>Add New Topic</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <form [formGroup]="addForm" (ngSubmit)="addTopic()" class="topic-form-grid">
+      <form
+        [formGroup]="addForm"
+        (ngSubmit)="addTopic()"
+        class="topic-form-grid"
+      >
         <div class="grid-container">
           <!-- Name and Description -->
           <div>
@@ -110,10 +139,17 @@
               </mat-form-field>
             </div>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Slug</mat-label>
-              <input matInput formControlName="slug" required />
-            </mat-form-field>
+           <div formGroupName="slug">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Slug (EN)</mat-label>
+    <input matInput formControlName="en" required />
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Slug (AR)</mat-label>
+    <input matInput formControlName="ar" />
+  </mat-form-field>
+</div>
+
 
             <div formGroupName="description">
               <mat-form-field appearance="outline" class="full-width">
@@ -152,11 +188,23 @@
               <mat-label>Course Count</mat-label>
               <input matInput type="number" formControlName="courseCount" />
             </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+  <mat-label>Category</mat-label>
+<input matInput formControlName="category" />
+</mat-form-field>
+
+
+           
           </div>
         </div>
 
         <div class="form-actions">
-          <button mat-raised-button color="primary" type="submit" [disabled]="addForm.invalid">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="addForm.invalid"
+          >
             Add
           </button>
         </div>
@@ -172,7 +220,11 @@
       <mat-card-title>Update Topic</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <form [formGroup]="updateForm" (ngSubmit)="updateTopic()" class="topic-form-grid">
+      <form
+        [formGroup]="updateForm"
+        (ngSubmit)="updateTopic()"
+        class="topic-form-grid"
+      >
         <div class="grid-container">
           <!-- Same style like Add -->
           <div>
@@ -187,10 +239,16 @@
               </mat-form-field>
             </div>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Slug</mat-label>
-              <input matInput formControlName="slug" />
-            </mat-form-field>
+            <div formGroupName="description">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description (EN)</mat-label>
+                <textarea matInput formControlName="en"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description (AR)</mat-label>
+                <textarea matInput formControlName="ar"></textarea>
+              </mat-form-field>
+            </div>
 
             <div formGroupName="description">
               <mat-form-field appearance="outline" class="full-width">
@@ -232,8 +290,15 @@
         </div>
 
         <div class="form-actions">
-          <button mat-button type="button" (click)="closeDialog()">Cancel</button>
-          <button mat-flat-button color="primary" type="submit" [disabled]="updateForm.invalid">
+          <button mat-button type="button" (click)="closeDialog()">
+            Cancel
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="updateForm.invalid"
+          >
             Update
           </button>
         </div>
