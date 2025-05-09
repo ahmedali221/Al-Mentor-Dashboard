@@ -5,8 +5,7 @@ import { PaymentsService } from '../../services/payments.service';
 import { Payment } from '../../interfaces/payment';
 import { User } from '../../interfaces/user.interface';
 import { Subscription } from '../../interfaces/subscriptions';
-import { ReactiveFormsModule } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // Material
 import { CommonModule } from '@angular/common';
@@ -57,21 +56,41 @@ export class PaymentsComponent implements OnInit {
 
   constructor(
     private paymentsService: PaymentsService,
-
     private fb: FormBuilder,
     private dialog: MatDialog
   ) {
     this.paymentForm = this.fb.group({
-      userId: ['', Validators.required],
-      subscriptionName: ['', Validators.required],
+      user: ['', Validators.required],
+      subscription: ['', Validators.required],
       amount: ['', [Validators.required, Validators.min(1)]],
-      transactionId: ['', Validators.required]
+      transactionId: ['', Validators.required],
+      currency: ['USD', Validators.required],
+      paymentMethod: ['Credit Card', Validators.required],
+      status: this.fb.group({
+        en: ['pending', Validators.required],  // Status in English
+        ar: ['قيد الانتظار', Validators.required]  // Status in Arabic
+      })
     });
   }
 
   ngOnInit(): void {
     this.loadPayments();
+    this.loadUsers();
+    this.loadSubscriptions();
+  }
 
+  loadUsers() {
+    this.paymentsService.getUsers().subscribe({
+      next: (users) => this.userList = users,
+      error: () => this.userList = []
+    });
+  }
+
+  loadSubscriptions() {
+    this.paymentsService.getSubscriptions().subscribe({
+      next: (subs) => this.subscriptionList = subs,
+      error: () => this.subscriptionList = []
+    });
   }
 
   loadPayments() {
@@ -90,14 +109,12 @@ export class PaymentsComponent implements OnInit {
   applyFilter() {
     const query = this.searchTerm.trim().toLowerCase();
     this.filteredPayments = this.payments.filter(p => {
-      // Filter by username only
       const matchesUsername =
         !query ||
         (typeof p.user === 'string'
           ? p.user.toLowerCase().includes(query)
           : p.user?.username?.toLowerCase().includes(query));
 
-      // Filter by subscription name from dropdown
       const matchesSubscription =
         !this.selectedSubscription ||
         (typeof p.subscription === 'string'
@@ -113,16 +130,38 @@ export class PaymentsComponent implements OnInit {
   }
 
   openAddDialog() {
-    this.paymentForm.reset();
+    this.paymentForm.reset({
+      currency: 'USD',
+      paymentMethod: 'Credit Card',
+      status: {
+        en: 'pending',
+        ar: 'قيد الانتظار',
+      }
+    });
     this.dialog.open(this.paymentDialog, { width: '400px' });
   }
 
   savePayment() {
     if (this.paymentForm.invalid) return;
-    this.paymentsService.createPayment(this.paymentForm.value).subscribe({
+    
+    const paymentData = this.paymentForm.value;
+    const formattedPayment = {
+      ...paymentData,
+      status: {
+        en: paymentData.status.en,
+        ar: paymentData.status.ar
+      }
+    };
+
+    console.log('Formatted Payment:', formattedPayment); // Log the formatted payment data
+
+    this.paymentsService.createPayment(formattedPayment).subscribe({
       next: () => {
         this.loadPayments();
         this.dialog.closeAll();
+      },
+      error: (err) => {
+        console.error('Error saving payment:', err);
       }
     });
   }

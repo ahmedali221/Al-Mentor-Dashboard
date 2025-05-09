@@ -347,7 +347,7 @@ export class CoursesComponent implements OnInit {
     this.filteredCourses = this.courses.filter(course => {
       const matchesSearch =
         course.title?.en?.toLowerCase().includes(search) ||
-        course.slug?.toLowerCase().includes(search) ||
+        // course.slug?.toLowerCase().includes(search) ||
         course.instructor?.toLowerCase().includes(search);
       return matchesSearch;
     });
