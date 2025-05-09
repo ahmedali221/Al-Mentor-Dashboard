@@ -1,4 +1,4 @@
-import { Component, ViewChild, TemplateRef, AfterViewInit, OnInit } from '@angular/core'; 
+import { Component, ViewChild, TemplateRef, AfterViewInit, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -39,7 +39,7 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class SubTopicsComponent implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<Subtopics>();
-  displayedColumns: string[] = ['name', 'slug', 'order', 'isFeatured', 'actions'];
+  displayedColumns: string[] = ['name', 'slug', 'order', 'isFeatured', 'actions', 'category'];
   addForm: FormGroup;
   updateForm: FormGroup;
   selectedSubTopic: Subtopics | null = null;
@@ -63,6 +63,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       }),
       slug: ['', Validators.required],
       topic: ['', Validators.required],
+      category: ['', Validators.required],
       description: this.fb.group({
         en: [''],
         ar: ['']
@@ -125,9 +126,9 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       this.dataSource.filter = this.selectedTopicId;
     }
   }
-  
-  
-  
+
+
+
 
   loadTopics() {
     this.topicsService.getTopics().subscribe({
@@ -197,7 +198,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       thumbnailImgUrl: '',
       order: 0,
       isFeatured: false
-    }); 
+    });
     this.dialog.open(this.addDialog, { width: '600px' });
   }
 
@@ -210,6 +211,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       },
       slug: subTopic.slug,
       topic: subTopic.topic,
+      category: subTopic.category,
       description: {
         en: subTopic.description?.en || '',
         ar: subTopic.description?.ar || ''
@@ -217,7 +219,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       thumbnailImgUrl: subTopic.thumbnailImgUrl,
       order: subTopic.order,
       isFeatured: subTopic.isFeatured
-    }); 
+    });
     this.dialog.open(this.updateDialog, { width: '600px' });
   }
 
