@@ -6,7 +6,8 @@ export interface Subtopics {
     ar: string;
   };
   slug: string;
-  topic: string; 
+  topic: string;
+  category: string;
   description?: {
     en?: string;
     ar?: string;
