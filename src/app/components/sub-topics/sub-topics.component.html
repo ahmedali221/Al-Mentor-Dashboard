@@ -1,7 +1,12 @@
 <div class="subtopics-container">
   <div class="header">
     <h1>SubTopics Management</h1>
-    <button mat-flat-button color="primary" class="add-button" (click)="openAddForm()">
+    <button
+      mat-flat-button
+      color="primary"
+      class="add-button"
+      (click)="openAddForm()"
+    >
       <mat-icon>add</mat-icon>
       Add New SubTopic
     </button>
@@ -12,7 +17,7 @@
       <mat-card-content>
         <div class="summary-content">
           <h3>Total SubTopics</h3>
-          <p class="summary-value">{{ dataSource?.data?.length || 0 }}</p>
+          <p class="summary-value">{{ dataSource.data.length || 0 }}</p>
         </div>
       </mat-card-content>
     </mat-card>
@@ -21,18 +26,32 @@
   <div class="search-filter-row">
     <mat-form-field appearance="outline" class="search-bar">
       <mat-label>Search SubTopics</mat-label>
-      <input matInput placeholder="Type to search..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" />
-      <button *ngIf="searchTerm" matSuffix mat-icon-button aria-label="Clear" (click)="searchTerm = ''; applyFilter()">
+      <input
+        matInput
+        placeholder="Type to search..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applyFilter()"
+      />
+      <button
+        *ngIf="searchTerm"
+        matSuffix
+        mat-icon-button
+        aria-label="Clear"
+        (click)="searchTerm = ''; applyFilter()"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="filter-dropdown">
       <mat-label>Filter by Topic</mat-label>
-      <mat-select [(ngModel)]="selectedTopicId" (selectionChange)="applyTopicFilter()">
+      <mat-select
+        [(ngModel)]="selectedTopicId"
+        (selectionChange)="applyTopicFilter()"
+      >
         <mat-option [value]="''">All Topics</mat-option>
         <mat-option *ngFor="let topic of topics" [value]="topic._id">
-          {{ topic.name?.en || 'Unnamed Topic' }}
+          {{ topic.name.en }}
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -48,11 +67,16 @@
         </ng-container>
 
         <!-- Slug -->
-        <ng-container matColumnDef="slug">
-          <th mat-header-cell *matHeaderCellDef>Slug</th>
-          <td mat-cell *matCellDef="let subTopic">{{ subTopic.slug }}</td>
-        </ng-container>
+          <ng-container matColumnDef="slug">
+            <th mat-header-cell *matHeaderCellDef>Slug</th>
+            <td mat-cell *matCellDef="let subTopic">{{ subTopic.slug }}</td>
+          </ng-container>
 
+        <!-- Category -->
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let subTopic">{{ subTopic.category }}</td>
+        </ng-container>
         <!-- Order -->
         <ng-container matColumnDef="order">
           <th mat-header-cell *matHeaderCellDef>Order</th>
@@ -62,17 +86,27 @@
         <!-- Featured -->
         <ng-container matColumnDef="isFeatured">
           <th mat-header-cell *matHeaderCellDef>Featured</th>
-          <td mat-cell *matCellDef="let subTopic">{{ subTopic.isFeatured ? 'Yes' : 'No' }}</td>
+          <td mat-cell *matCellDef="let subTopic">
+            {{ subTopic.isFeatured ? "Yes" : "No" }}
+          </td>
         </ng-container>
 
         <!-- Actions -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let subTopic">
-            <button mat-icon-button color="primary" (click)="openUpdateForm(subTopic)">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="openUpdateForm(subTopic)"
+            >
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="deleteSubTopic(subTopic._id)">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteSubTopic(subTopic._id)"
+            >
               <mat-icon>delete</mat-icon>
             </button>
           </td>
@@ -91,7 +125,11 @@
         <mat-card-title>Add New SubTopic</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <form [formGroup]="addForm" (ngSubmit)="addSubTopic()" class="subtopic-form-grid">
+        <form
+          [formGroup]="addForm"
+          (ngSubmit)="addSubTopic()"
+          class="subtopic-form-grid"
+        >
           <div class="grid-container">
             <div>
               <div formGroupName="name">
@@ -126,6 +164,10 @@
 
             <div>
               <mat-form-field appearance="outline">
+                <mat-label>Category</mat-label>
+                <input matInput formControlName="category" />
+            </mat-form-field>
+              <mat-form-field appearance="outline">
                 <mat-label>Topic</mat-label>
                 <input matInput formControlName="topic" />
               </mat-form-field>
@@ -145,7 +187,12 @@
           </div>
 
           <div class="form-actions">
-            <button mat-raised-button color="primary" type="submit" [disabled]="addForm.invalid">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="addForm.invalid"
+            >
               Add
             </button>
           </div>
@@ -161,7 +208,11 @@
         <mat-card-title>Update SubTopic</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <form [formGroup]="updateForm" (ngSubmit)="updateSubTopic()" class="subtopic-form-grid">
+        <form
+          [formGroup]="updateForm"
+          (ngSubmit)="updateSubTopic()"
+          class="subtopic-form-grid"
+        >
           <div class="grid-container">
             <div>
               <div formGroupName="name">
@@ -193,12 +244,16 @@
                 </mat-form-field>
               </div>
             </div>
+         
 
+          
             <div>
-              <mat-form-field appearance="outline">
-                <mat-label>Topic</mat-label>
-                <input matInput formControlName="topic" />
-              </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Topic</mat-label>
+                    <input matInput formControlName="topic" />
+                  </mat-form-field>
+
+                 
 
               <mat-form-field appearance="outline">
                 <mat-label>Order</mat-label>
@@ -215,8 +270,17 @@
           </div>
 
           <div class="form-actions">
-            <button mat-button type="button" (click)="closeDialog()">Cancel</button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="updateForm.invalid">Update</button>
+            <button mat-button type="button" (click)="closeDialog()">
+              Cancel
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="updateForm.invalid"
+            >
+              Update
+            </button>
           </div>
         </form>
       </mat-card-content>
