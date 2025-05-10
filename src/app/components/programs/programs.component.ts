@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { TitleCasePipe } from '@angular/common';
+import { FormControl } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -15,12 +16,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
   selector: 'app-programs',
   standalone: true,
   imports: [
+    CommonModule, // Add this line
     MatButtonModule,
     MatIconModule,
     MatCardModule,
@@ -30,7 +33,7 @@ import { CategoryService } from '../../services/category.service';
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatInputModule, MatSelectModule, MatChipsModule
+    MatInputModule, MatSelectModule, MatChipsModule,
 
   ],
   templateUrl: './programs.component.html',
@@ -38,62 +41,97 @@ import { CategoryService } from '../../services/category.service';
 })
 export class ProgramsComponent {
 
-  programFields: string[] = [];
+  categories: any[] = []; // Store full category objects
+  programFields: string[] = []; // You can keep this for display if needed
   displayedColumns: string[] = ['title', 'level', 'language', 'category', 'totalDuration', 'Courses', 'actions'];
   programs: program[] = [];
   addForm: FormGroup;
   updateForm: FormGroup;
   selectedProgram: any;
   selectedField: string | null = null;
+  searchQuery: string = '';
+  filteredPrograms: program[] = [];
 
   constructor(
     private programService: ProgramsService,
-    private categoriesService: CategoryService, // Add this
+    private categoriesService: CategoryService,
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private router: Router // Add this
+    private router: Router
   ) {
     this.addForm = this.fb.group({
-      title: ['', Validators.required],
-      slug: ['', Validators.required],
-      description: ['', Validators.required],
+      title: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
+      slug: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
+      description: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
       thumbnail: ['', Validators.required],
-      level: ['', Validators.required],
+      level: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
       language: ['', Validators.required],
-      category: ['', Validators.required],
-      totalDuration: ['', Validators.required]
+      totalDuration: ['', Validators.required],
+      category: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
+      courses: [[]],
+      learningOutcomes: this.fb.array([]),
     });
 
     this.updateForm = this.fb.group({
-      title: ['', Validators.required],
-      slug: ['', Validators.required],
-      description: ['', Validators.required],
+      title: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
+      slug: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
+      description: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
       thumbnail: ['', Validators.required],
-      level: ['', Validators.required],
+      level: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
       language: ['', Validators.required],
-      category: ['', Validators.required],
-      totalDuration: ['', Validators.required]
+      totalDuration: ['', Validators.required],
+      category: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required]
+      }),
+      courses: [[]],
+      learningOutcomes: this.fb.array([]),
     });
   }
 
   ngOnInit() {
     this.loadPrograms();
-    this.loadCategories(); // Add this
+    this.loadCategories();
   }
 
-  // Add this method
   loadCategories() {
     this.categoriesService.getCategories().subscribe({
       next: (categories) => {
-        this.programFields = categories.map(category => category.name.en);
+        this.categories = categories;
+        this.programFields = categories.map(category => category.name.en); // For backward compatibility
       },
       error: (error) => {
         console.error('Failed to load categories:', error);
       }
     });
   }
-  searchQuery: string = '';
-  filteredPrograms: program[] = [];
 
   applySearchFilter() {
     let filtered = [...this.programs];
@@ -104,7 +142,6 @@ export class ProgramsComponent {
       );
     }
 
-    // Filter by search query
     if (this.searchQuery) {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(program =>
@@ -126,11 +163,13 @@ export class ProgramsComponent {
     });
   }
 
-
-
   addProgram() {
     if (this.addForm.valid) {
-      this.programService.addProgram(this.addForm.value).subscribe({
+      const formValue = this.addForm.value;
+      if (!Array.isArray(formValue.courses)) {
+        formValue.courses = [];
+      }
+      this.programService.addProgram(formValue).subscribe({
         next: () => {
           this.loadPrograms();
           this.dialog.closeAll();
@@ -151,7 +190,8 @@ export class ProgramsComponent {
     }
   }
 
-  deleteProgram(id: string) {
+  deleteProgram(id: string, event?: MouseEvent) {
+    if (event) event.stopPropagation();
     if (confirm('Are you sure you want to delete this program?')) {
       this.programService.deleteProgram(id).subscribe({
         next: () => {
@@ -161,9 +201,8 @@ export class ProgramsComponent {
     }
   }
 
-
-
   @ViewChild('addDialog') addDialog!: TemplateRef<any>;
+  @ViewChild('updateDialog') updateDialog!: TemplateRef<any>;
 
   openAddForm() {
     this.addForm.reset();
@@ -172,8 +211,8 @@ export class ProgramsComponent {
     });
   }
 
-  @ViewChild('updateDialog') updateDialog!: TemplateRef<any>;
-  openUpdateForm(program: program) {
+  openUpdateForm(program: program, event?: MouseEvent) {
+    if (event) event.stopPropagation();
     this.selectedProgram = program;
     this.updateForm.patchValue({
       title: program.title,
@@ -202,8 +241,12 @@ export class ProgramsComponent {
     }
   }
 
-  // Add this method
   viewProgramDetails(programId: string) {
     this.router.navigate(['/programs', programId]);
   }
+
+  trackByCategoryId(index: number, category: any): string {
+    return category._id; // or any unique identifier from your category object
+  }
 }
+

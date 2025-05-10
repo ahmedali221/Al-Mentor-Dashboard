@@ -40,8 +40,8 @@ import { CommonModule } from '@angular/common';
 })
 export class UserSubscriptionsComponent implements OnInit {
   displayedColumns: string[] = [
-    'userId', // Refers to the "user" field
-    'subscriptionId', // Refers to the "subscription._id" field
+    'userId',
+    'subscriptionId',
     'startDate',
     'endDate',
     'status',
@@ -62,7 +62,6 @@ export class UserSubscriptionsComponent implements OnInit {
     private fb: FormBuilder,
     private dialog: MatDialog
   ) {
-    // Initialize Add User Subscription Form
     this.addUserSubscriptionForm = this.fb.group({
       userId: ['', Validators.required],
       subscriptionId: ['', Validators.required],
@@ -163,7 +162,6 @@ export class UserSubscriptionsComponent implements OnInit {
       .subscribe({
         next: () => {
           subscription.status = newStatus;
-          console.log(subscription.status)
         },
         error: (error) => {
           console.error('Error toggling subscription status:', error);

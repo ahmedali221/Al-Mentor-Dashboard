@@ -1,14 +1,16 @@
+import { MultilingualString } from './multilingual-string.interface';
+import { Subscription } from './subscriptions';
+import { User } from './user.interface';
+
 export interface Payment {
-  _id?: string;
-  user: string | { _id: string; username: string };
-  subscription: string | {
-    displayName: any; _id: string; name: string
-  };
+  _id: string;
+  user: User; // ObjectId reference to User
+  subscription: Subscription; // ObjectId reference to Subscription
   amount: number;
-  currency?: string;
+  currency?: "USD" | "EGP";
   transactionId: string;
-  status?: string | { en: string; ar: string };
-  paymentMethod?: string;
+  status: MultilingualString; // Use MultilingualString for status
+  paymentMethod: "credit_card" | "paypal" | "bank_transfer";
   createdAt?: string;
   updatedAt?: string;
 }

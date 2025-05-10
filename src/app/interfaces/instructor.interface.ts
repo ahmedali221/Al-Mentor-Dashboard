@@ -8,8 +8,8 @@ interface Profile {
 }
 
 export interface Instructor {
-  name: MultilingualString;
   _id: string;
+  name: MultilingualString;
   user: string;
   professionalTitle: MultilingualString;
   expertiseAreas: { en: string[]; ar?: string[] };

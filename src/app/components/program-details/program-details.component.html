@@ -74,6 +74,55 @@
           <span class="label">Description:</span>
           <p>{{ program.description.en }}</p>
         </div>
+
+        <div class="associated-courses">
+          <h3>Associated Courses</h3>
+          <div *ngIf="program.courses.length > 0; else noCourses">
+            <mat-list *ngIf="program?.courses?.length">
+              <mat-list-item *ngFor="let course of program.courses">
+                <span matListItemTitle>
+                  {{ course._id }}
+                </span>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="removeCourseFromProgram(course._id)"
+                  *ngIf="course._id"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-list-item>
+            </mat-list>
+            <div *ngIf="program?.courses && !program.courses.length">
+              No courses in this program
+            </div>
+          </div>
+          <ng-template #noCourses>
+            <p>No courses associated with this program</p>
+          </ng-template>
+
+          <div class="add-course-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Add Course</mat-label>
+              <mat-select [(ngModel)]="selectedCourseId">
+                <mat-option
+                  *ngFor="let course of unassociatedCourses"
+                  [value]="course._id"
+                >
+                  {{ course.title.en }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="addCourseToProgram()"
+              [disabled]="!selectedCourseId"
+            >
+              Add Course
+            </button>
+          </div>
+        </div>
       </mat-card-content>
     </mat-card>
   </div>

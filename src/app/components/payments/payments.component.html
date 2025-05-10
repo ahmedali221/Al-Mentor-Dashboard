@@ -24,13 +24,14 @@
   </div>
 
   <div class="search-filter-row">
-    <mat-form-field appearance="outline" class="search-bar">
+    <!-- Add search input for username -->
+    <mat-form-field appearance="outline" class="search-input">
       <mat-label>Search by Username</mat-label>
       <input
         matInput
-        placeholder="Type username..."
         [(ngModel)]="searchTerm"
-        (ngModelChange)="applyFilter()"
+        placeholder="Enter username"
+        (keyup)="applyFilter()"
       />
       <button
         *ngIf="searchTerm"
@@ -43,18 +44,63 @@
       </button>
     </mat-form-field>
 
+    <!-- Add subscription filter -->
     <mat-form-field appearance="outline" class="filter-dropdown">
       <mat-label>Filter by Subscription</mat-label>
       <mat-select
         [(ngModel)]="selectedSubscription"
         (selectionChange)="onSubscriptionFilterChange()"
       >
-        <mat-option [value]="''">All Subscriptions</mat-option>
-        <mat-option *ngFor="let sub of subscriptionList" [value]="sub.name">
+        <mat-option [value]="">All Subscriptions</mat-option>
+        <mat-option *ngFor="let sub of subscriptionList" [value]="sub._id">
           {{ sub.displayName.en }}
         </mat-option>
       </mat-select>
     </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-dropdown">
+      <mat-label>Filter by Status</mat-label>
+      <mat-select
+        [(ngModel)]="selectedStatus"
+        (selectionChange)="onStatusFilterChange()"
+      >
+        <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-dropdown">
+      <mat-label>Filter by Payment Method</mat-label>
+      <mat-select
+        [(ngModel)]="selectedPaymentMethod"
+        (selectionChange)="onPaymentMethodFilterChange()"
+      >
+        <mat-option
+          *ngFor="let option of paymentMethodOptions"
+          [value]="option.value"
+        >
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="filter-actions">
+    <button
+      mat-button
+      color="primary"
+      (click)="clearFilters()"
+      *ngIf="
+        searchTerm ||
+        selectedSubscription ||
+        selectedStatus ||
+        selectedPaymentMethod
+      "
+    >
+      <mat-icon>clear_all</mat-icon>
+      Clear All Filters
+    </button>
   </div>
 
   <mat-card>
@@ -108,21 +154,6 @@
           </td>
         </ng-container>
 
-        <!-- Actions Column (optional, add buttons if needed) -->
-        <!--
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let p">
-            <button mat-icon-button color="primary">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button color="warn">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-        -->
-
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
@@ -152,10 +183,10 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Subscription</mat-label>
-            <mat-select formControlName="subscriptionName">
+            <mat-select formControlName="subscriptionId">
               <mat-option
                 *ngFor="let sub of subscriptionList"
-                [value]="sub.name"
+                [value]="sub._id"
                 >{{ sub.displayName.en }}</mat-option
               >
             </mat-select>
@@ -167,8 +198,43 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Currency</mat-label>
+            <mat-select formControlName="currency">
+              <mat-option value="USD">USD</mat-option>
+              <mat-option value="EGP">EGP</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Transaction ID</mat-label>
             <input matInput formControlName="transactionId" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Status (English)</mat-label>
+            <mat-select formControlName="statusEn">
+              <mat-option value="pending">pending</mat-option>
+              <mat-option value="completed">completed</mat-option>
+              <mat-option value="failed">failed</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Status (Arabic)</mat-label>
+            <mat-select formControlName="statusAr">
+              <mat-option value="قيد الانتظار">قيد الانتظار</mat-option>
+              <mat-option value="مكتمل">مكتمل</mat-option>
+              <mat-option value="فشل">فشل</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Payment Method</mat-label>
+            <mat-select formControlName="paymentMethod">
+              <mat-option value="credit_card">Credit Card</mat-option>
+              <mat-option value="paypal">PayPal</mat-option>
+              <mat-option value="bank_transfer">Bank Transfer</mat-option>
+            </mat-select>
           </mat-form-field>
 
           <div class="form-actions">

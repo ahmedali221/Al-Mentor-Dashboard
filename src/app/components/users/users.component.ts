@@ -106,8 +106,8 @@ export class UsersComponent implements OnInit {
   openUpdateUserForm(user: User) {
     this.selectedUser = user;
     this.updateUserForm.patchValue({
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstName: user.firstName.en,
+      lastName: user.lastName.en,
       email: user.email,
       username: user.username,
 
