@@ -48,7 +48,86 @@ mat-card,
   background-color: var(--background-color) !important;
   color: var(--text-dark) !important;
 }
+// Add these styles to your existing file
 
+// Dropdown/Select panel styling
+.mat-mdc-select-value,
+.mat-mdc-select-arrow,
+.mat-mdc-select-placeholder {
+  color: var(--text-dark) !important;
+}
+
+.mat-mdc-select-panel {
+  background-color: var(--background-color) !important;
+  border: 1px solid var(--border-color) !important;
+
+  .mat-mdc-option {
+    color: var(--text-dark) !important;
+
+    &:hover:not(.mdc-list-item--disabled),
+    &:focus:not(.mdc-list-item--disabled),
+    &.mat-mdc-option-active {
+      background-color: rgba(var(--primary-color), 0.1) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      color: var(--primary-color) !important;
+    }
+  }
+}
+
+// Search bar/input field styling
+.mat-mdc-input-element,
+.mat-mdc-form-field-label,
+.mat-mdc-floating-label {
+  color: var(--text-dark) !important;
+}
+
+.mat-mdc-form-field {
+  .mdc-text-field {
+    background-color: transparent !important;
+    border-color: var(--border-color) !important;
+
+    .mdc-text-field__input {
+      color: var(--text-dark) !important;
+    }
+
+    &:not(.mdc-text-field--disabled) {
+      .mdc-floating-label {
+        color: var(--text-dark) !important;
+      }
+
+      .mdc-line-ripple::after {
+        border-bottom-color: var(--primary-color) !important;
+      }
+    }
+  }
+
+  .mat-mdc-form-field-icon-prefix,
+  .mat-mdc-form-field-icon-suffix {
+    color: var(--text-dark) !important;
+  }
+}
+
+// Autocomplete panel
+.mat-mdc-autocomplete-panel {
+  background-color: var(--background-color) !important;
+  border: 1px solid var(--border-color) !important;
+
+  .mat-mdc-option {
+    color: var(--text-dark) !important;
+
+    &:hover:not(.mdc-list-item--disabled),
+    &:focus:not(.mdc-list-item--disabled),
+    &.mat-mdc-option-active {
+      background-color: rgba(var(--primary-color), 0.1) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      color: var(--primary-color) !important;
+    }
+  }
+}
 .mat-mdc-button,
 .mat-mdc-raised-button,
 .mat-mdc-flat-button {

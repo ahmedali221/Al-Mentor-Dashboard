@@ -35,10 +35,11 @@
   <mat-card>
     <mat-card-content>
       <mat-chip-listbox aria-label="Category filter">
-        <mat-chip-option 
+        <mat-chip-option
           *ngFor="let category of categories; trackBy: trackByCategoryId"
           [selected]="selectedField === category.name.en"
-          (click)="onFieldClick(category.name.en)">
+          (click)="onFieldClick(category.name.en)"
+        >
           {{ category.name.en | titlecase }}
         </mat-chip-option>
       </mat-chip-listbox>
@@ -87,13 +88,6 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let program">
-            <button
-              mat-icon-button
-              color="primary"
-              (click)="openUpdateForm(program, $event)"
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
             <button
               mat-icon-button
               color="warn"
@@ -194,7 +188,10 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Category (EN)</mat-label>
                 <mat-select formControlName="en">
-                  <mat-option *ngFor="let category of categories" [value]="category.name.en">
+                  <mat-option
+                    *ngFor="let category of categories"
+                    [value]="category.name.en"
+                  >
                     {{ category.name.en | titlecase }}
                   </mat-option>
                 </mat-select>
@@ -202,7 +199,10 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Category (AR)</mat-label>
                 <mat-select formControlName="ar">
-                  <mat-option *ngFor="let category of categories" [value]="category.name.ar">
+                  <mat-option
+                    *ngFor="let category of categories"
+                    [value]="category.name.ar"
+                  >
                     {{ category.name.ar }}
                   </mat-option>
                 </mat-select>
