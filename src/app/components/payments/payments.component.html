@@ -154,12 +154,27 @@
           </td>
         </ng-container>
 
+        <!-- Actions Column (optional, add buttons if needed) -->
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let p">
+            <button mat-icon-button color="primary">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
     </mat-card-content>
   </mat-card>
 
+  <!-- Add Payment Dialog -->
   <!-- Add Payment Dialog -->
   <ng-template #paymentDialog>
     <mat-card>
@@ -174,7 +189,7 @@
         >
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>User</mat-label>
-            <mat-select formControlName="userId">
+            <mat-select formControlName="user">
               <mat-option *ngFor="let user of userList" [value]="user._id">
                 {{ user.username }}
               </mat-option>
@@ -183,18 +198,24 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Subscription</mat-label>
-            <mat-select formControlName="subscriptionId">
+            <mat-select formControlName="subscription">
               <mat-option
                 *ngFor="let sub of subscriptionList"
                 [value]="sub._id"
-                >{{ sub.displayName.en }}</mat-option
               >
+                {{ sub.displayName.en }}
+              </mat-option>
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Amount</mat-label>
             <input matInput formControlName="amount" type="number" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Transaction ID</mat-label>
+            <input matInput formControlName="transactionId" />
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
@@ -206,34 +227,28 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Transaction ID</mat-label>
-            <input matInput formControlName="transactionId" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Status (English)</mat-label>
-            <mat-select formControlName="statusEn">
-              <mat-option value="pending">pending</mat-option>
-              <mat-option value="completed">completed</mat-option>
-              <mat-option value="failed">failed</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Status (Arabic)</mat-label>
-            <mat-select formControlName="statusAr">
-              <mat-option value="قيد الانتظار">قيد الانتظار</mat-option>
-              <mat-option value="مكتمل">مكتمل</mat-option>
-              <mat-option value="فشل">فشل</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Payment Method</mat-label>
             <mat-select formControlName="paymentMethod">
               <mat-option value="credit_card">Credit Card</mat-option>
               <mat-option value="paypal">PayPal</mat-option>
               <mat-option value="bank_transfer">Bank Transfer</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Status-en</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="Paid">Paid</mat-option>
+              <mat-option value="Pending">Pending</mat-option>
+              <mat-option value="Failed">Failed</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Status-ar</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="Paid">مكتمل </mat-option>
+              <mat-option value="Pending">قيد الانتظار</mat-option>
+              <mat-option value="Failed">فشل</mat-option>
             </mat-select>
           </mat-form-field>
 

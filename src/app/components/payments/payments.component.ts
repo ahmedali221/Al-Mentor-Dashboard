@@ -5,8 +5,7 @@ import { PaymentsService } from '../../services/payments.service';
 import { Payment } from '../../interfaces/payment';
 import { User } from '../../interfaces/user.interface';
 import { Subscription } from '../../interfaces/subscriptions';
-import { ReactiveFormsModule } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // Material
 import { CommonModule } from '@angular/common';
@@ -85,14 +84,16 @@ export class PaymentsComponent implements OnInit {
     private subscriptionsService: SubscriptionsService
   ) {
     this.paymentForm = this.fb.group({
-      userId: ['', Validators.required],
-      subscriptionId: ['', Validators.required],
-      amount: ['', [Validators.required, Validators.min(0)]],
-      currency: ['USD', Validators.required],
+      user: ['', Validators.required],
+      subscription: ['', Validators.required],
+      amount: ['', [Validators.required, Validators.min(1)]],
       transactionId: ['', Validators.required],
-      statusEn: ['pending', Validators.required],
-      statusAr: ['قيد الانتظار', Validators.required],
-      paymentMethod: ['credit_card', Validators.required]
+      currency: ['USD', Validators.required],
+      paymentMethod: ['Credit Card', Validators.required],
+      status: this.fb.group({
+        en: ['pending', Validators.required],  // Status in English
+        ar: ['قيد الانتظار', Validators.required]  // Status in Arabic
+      })
     });
   }
 
@@ -103,24 +104,16 @@ export class PaymentsComponent implements OnInit {
   }
 
   loadUsers() {
-    this.usersService.getUsers().subscribe({
-      next: (users) => {
-        this.userList = users || [];
-      },
-      error: () => {
-        this.userList = [];
-      }
+    this.paymentsService.getUsers().subscribe({
+      next: (users) => this.userList = users,
+      error: () => this.userList = []
     });
   }
 
   loadSubscriptions() {
-    this.subscriptionsService.getAll().subscribe({
-      next: (subs) => {
-        this.subscriptionList = subs || [];
-      },
-      error: () => {
-        this.subscriptionList = [];
-      }
+    this.paymentsService.getSubscriptions().subscribe({
+      next: (subs) => this.subscriptionList = subs,
+      error: () => this.subscriptionList = []
     });
   }
 
@@ -139,34 +132,17 @@ export class PaymentsComponent implements OnInit {
 
   applyFilter() {
     this.filteredPayments = this.payments.filter(p => {
-      // Get user data for this payment
-      const userObj = typeof p.user === 'object' ? p.user : this.userList.find(u => u === p.user);
+      const matchesUsername =
+        !query ||
+        (typeof p.user === 'string'
+          ? p.user.toLowerCase().includes(query)
+          : p.user?.username?.toLowerCase().includes(query));
 
-      // Search by username and name
-      const username = userObj?.username?.toLowerCase() || '';
-      const firstName = userObj?.firstName?.en?.toLowerCase() || '';
-      const lastName = userObj?.lastName?.en?.toLowerCase() || '';
-      const fullName = `${firstName} ${lastName}`.trim().toLowerCase();
-      const searchTermLower = this.searchTerm.trim().toLowerCase();
-
-      const matchesUser = !this.searchTerm ||
-        username.includes(searchTermLower) ||
-        firstName.includes(searchTermLower) ||
-        lastName.includes(searchTermLower) ||
-        fullName.includes(searchTermLower);
-
-      // Filter by subscription
-      const matchesSubscription = !this.selectedSubscription ||
-        (typeof p.subscription === 'object' && p.subscription._id === this.selectedSubscription);
-
-      // Filter by status
-      const status = typeof p.status === 'object' ? p.status.en?.toLowerCase() : '';
-      const matchesStatus = !this.selectedStatus ||
-        status === this.selectedStatus;
-
-      // Filter by payment method
-      const matchesPaymentMethod = !this.selectedPaymentMethod ||
-        p.paymentMethod === this.selectedPaymentMethod;
+      const matchesSubscription =
+        !this.selectedSubscription ||
+        (typeof p.subscription === 'string'
+          ? p.subscription === this.selectedSubscription
+          : p.subscription?.name === this.selectedSubscription);
 
       return matchesUser && matchesSubscription && matchesStatus && matchesPaymentMethod;
     });
@@ -193,29 +169,38 @@ export class PaymentsComponent implements OnInit {
   }
 
   openAddDialog() {
-    this.paymentForm.reset();
+    this.paymentForm.reset({
+      currency: 'USD',
+      paymentMethod: 'Credit Card',
+      status: {
+        en: 'pending',
+        ar: 'قيد الانتظار',
+      }
+    });
     this.dialog.open(this.paymentDialog, { width: '400px' });
   }
 
   savePayment() {
     if (this.paymentForm.invalid) return;
-    const formValue = this.paymentForm.value;
-    const paymentData = {
-      user: formValue.userId,
-      subscription: formValue.subscriptionId,
-      amount: formValue.amount,
-      currency: formValue.currency,
-      transactionId: formValue.transactionId,
+
+    const paymentData = this.paymentForm.value;
+    const formattedPayment = {
+      ...paymentData,
       status: {
-        en: formValue.statusEn,
-        ar: formValue.statusAr
-      },
-      paymentMethod: formValue.paymentMethod
+        en: paymentData.status.en,
+        ar: paymentData.status.ar
+      }
     };
-    this.paymentsService.createPayment(paymentData).subscribe({
+
+    console.log('Formatted Payment:', formattedPayment); // Log the formatted payment data
+
+    this.paymentsService.createPayment(formattedPayment).subscribe({
       next: () => {
         this.loadPayments();
         this.dialog.closeAll();
+      },
+      error: (err) => {
+        console.error('Error saving payment:', err);
       }
     });
   }
