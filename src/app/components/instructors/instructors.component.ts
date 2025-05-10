@@ -11,7 +11,9 @@ import { InstructorsService } from '../../services/instructors.service';
 import { Instructor } from '../../interfaces/instructor.interface';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { UsersService } from '../../services/users.service';
+import { User } from '../../interfaces/user.interface';
 
 
 @Component({
@@ -32,6 +34,7 @@ import { MatSelectModule } from '@angular/material/select';
 export class InstructorsComponent implements OnInit {
   displayedColumns: string[] = ['profile', 'email', 'professionalTitle', 'expertiseAreas', 'approvalStatus', 'actions'];
   instructors: Instructor[] = [];
+  users: User[] = [];
   searchTerm: string = '';
   loading = false;
   error = '';
@@ -46,31 +49,64 @@ export class InstructorsComponent implements OnInit {
 
   constructor(
     private instructorsService: InstructorsService,
+    private usersService: UsersService,
     private fb: FormBuilder,
     private dialog: MatDialog
   ) {
     // Add Instructor Form
     this.addInstructorForm = this.fb.group({
       user: ['', Validators.required],
-      professionalTitle: ['', Validators.required],
-      expertiseAreas: ['', Validators.required], // comma separated string
-      biography: [''],
+      nameEn: ['', Validators.required],
+      nameAr: [''],
+      professionalTitleEn: ['', Validators.required],
+      professionalTitleAr: [''],
+      biographyEn: [''],
+      biographyAr: [''],
+      expertiseAreasEn: ['', Validators.required],
+      expertiseAreasAr: [''],
+      yearsOfExperience: [0],
+      linkedin: [''],
+      twitter: [''],
+      youtube: [''],
+      website: [''],
       approvalStatus: ['pending', Validators.required]
     });
 
     // Update Instructor Form
     this.updateInstructorForm = this.fb.group({
       user: ['', Validators.required],
-      professionalTitle: ['', Validators.required],
-      expertiseAreas: ['', Validators.required], // comma separated string
-      biography: [''],
+      nameEn: ['', Validators.required],
+      nameAr: [''],
+      professionalTitleEn: ['', Validators.required],
+      professionalTitleAr: [''],
+      biographyEn: [''],
+      biographyAr: [''],
+      expertiseAreasEn: ['', Validators.required],
+      expertiseAreasAr: [''],
+      yearsOfExperience: [0],
+      linkedin: [''],
+      twitter: [''],
+      youtube: [''],
+      website: [''],
       approvalStatus: ['pending', Validators.required]
     });
   }
 
   ngOnInit() {
-    console.log("Getting the data");
     this.loadInstructors();
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.usersService.getUsers().subscribe({
+      next: (data) => {
+        this.users = data;
+      },
+      error: (error) => {
+        this.error = 'Failed to load users';
+        console.error('Error loading users:', error);
+      }
+    });
   }
 
   loadInstructors() {
@@ -82,6 +118,8 @@ export class InstructorsComponent implements OnInit {
         this.instructors = data;
         this.filteredInstructors = [...data]; // Initialize filtered array
         this.loading = false;
+        console.log(this.instructors)
+
       },
       error: (error) => {
         this.error = 'Failed to load instructors';
@@ -99,12 +137,12 @@ export class InstructorsComponent implements OnInit {
 
     const query = this.searchTerm.toLowerCase();
     this.filteredInstructors = this.instructors.filter(instructor =>
-      instructor.professionalTitle.toLowerCase().includes(query) ||
-      (instructor.profile?.firstName?.toLowerCase()?.includes(query)) ||
-      (instructor.profile?.lastName?.toLowerCase()?.includes(query)) ||
-      (instructor.profile?.email?.toLowerCase()?.includes(query)) ||
-      instructor.expertiseAreas.join(' ').toLowerCase().includes(query) ||
-      instructor.approvalStatus.toLowerCase().includes(query)
+      (instructor.profile.firstName?.en?.toLowerCase().includes(query) || '') ||
+      (instructor.profile.lastName?.en?.toLowerCase().includes(query) || '') ||
+      (instructor.profile.email?.toLowerCase().includes(query) || '') ||
+      (instructor.professionalTitle?.en?.toLowerCase().includes(query) || '') ||
+      (Array.isArray(instructor.expertiseAreas?.en) && instructor.expertiseAreas.en.join(' ').toLowerCase().includes(query)) ||
+      (instructor.approvalStatus?.toLowerCase().includes(query) || '')
     );
   }
 
@@ -132,42 +170,122 @@ export class InstructorsComponent implements OnInit {
 
   openUpdateInstructorForm(instructor: Instructor) {
     this.selectedInstructor = instructor;
+
+    // Extract values from the instructor object to populate the form
     this.updateInstructorForm.patchValue({
       user: instructor.user,
-      professionalTitle: instructor.professionalTitle,
-      expertiseAreas: instructor.expertiseAreas.join(', '),
-      biography: instructor.biography,
+      nameEn: instructor.name?.en || '',
+      nameAr: instructor.name?.ar || '',
+      professionalTitleEn: instructor.professionalTitle?.en || '',
+      professionalTitleAr: instructor.professionalTitle?.ar || '',
+      biographyEn: instructor.biography?.en || '',
+      biographyAr: instructor.biography?.ar || '',
+      expertiseAreasEn: instructor.expertiseAreas?.en?.join(', ') || '',
+      expertiseAreasAr: instructor.expertiseAreas?.ar?.join(', ') || '',
+      yearsOfExperience: instructor.yearsOfExperience || 0,
+      linkedin: instructor.socialMediaLinks?.linkedin || '',
+      twitter: instructor.socialMediaLinks?.twitter || '',
+      youtube: instructor.socialMediaLinks?.youtube || '',
+      website: instructor.socialMediaLinks?.website || '',
       approvalStatus: instructor.approvalStatus
     });
+
     this.dialog.open(this.updateInstructorDialog, { width: '70%' });
   }
 
-  addInstructor() {
-    if (this.addInstructorForm.valid) {
-      const formValue = this.addInstructorForm.value;
-      const newInstructor: Instructor = {
-        ...formValue,
-        expertiseAreas: formValue.expertiseAreas.split(',').map((s: string) => s.trim()),
-        approvalStatus: formValue.approvalStatus
-      };
-      this.instructorsService.addInstructor(newInstructor).subscribe({
-        next: () => {
-          this.loadInstructors();
-          this.dialog.closeAll();
-        }
+  // addInstructor() {
+  //   if (this.addInstructorForm.valid) {
+  //     const formValue = this.addInstructorForm.value;
+
+  //     // Create a properly structured instructor object
+  //     const newInstructor: Instructor = {
+  //       user: formValue.user,
+  //       name: {
+  //         en: formValue.nameEn,
+  //         ar: formValue.nameAr
+  //       },
+  //       professionalTitle: {
+  //         en: formValue.professionalTitleEn,
+  //         ar: formValue.professionalTitleAr
+  //       },
+  //       biography: {
+  //         en: formValue.biographyEn,
+  //         ar: formValue.biographyAr
+  //       },
+  //       expertiseAreas: {
+  //         en: formValue.expertiseAreasEn.split(',').map((s: string) => s.trim()),
+  //         ar: formValue.expertiseAreasAr ? formValue.expertiseAreasAr.split(',').map((s: string) => s.trim()) : []
+  //       },
+  //       yearsOfExperience: formValue.yearsOfExperience,
+  //       socialMediaLinks: {
+  //         linkedin: formValue.linkedin,
+  //         twitter: formValue.twitter,
+  //         youtube: formValue.youtube,
+  //         website: formValue.website
+  //       },
+  //       approvalStatus: formValue.approvalStatus,
+  //       profile: {
+  //         firstName: { en: '', ar: '' },
+  //         lastName: { en: '', ar: '' },
+  //         email: '',
+  //         profilePicture: ''
+  //       }
+  //     };
+
+  //     this.instructorsService.addInstructor(newInstructor).subscribe({
+  //       next: () => {
+  //         this.loadInstructors();
+  //         this.dialog.closeAll();
+  //       }
+  //     });
+  //   }
+  // }
+  onUserSelectionChange(event: MatSelectChange): void {
+    const selectedUserId = event.value;
+    const selectedUser = this.users.find(user => user._id === selectedUserId);
+
+    if (selectedUser) {
+      // Update the name fields with the user's first and last name
+      this.updateInstructorForm.patchValue({
+        nameEn: `${selectedUser.firstName?.en || ''} ${selectedUser.lastName?.en || ''}`.trim(),
+        nameAr: `${selectedUser.firstName?.ar || ''} ${selectedUser.lastName?.ar || ''}`.trim()
       });
     }
   }
-
   updateInstructor() {
     if (this.updateInstructorForm.valid && this.selectedInstructor) {
       const formValue = this.updateInstructorForm.value;
+
+      // Create updated instructor object with proper structure
       const updatedInstructor: Instructor = {
         ...this.selectedInstructor,
-        ...formValue,
-        expertiseAreas: formValue.expertiseAreas.split(',').map((s: string) => s.trim()),
+        user: formValue.user,
+        name: {
+          en: formValue.nameEn,
+          ar: formValue.nameAr
+        },
+        professionalTitle: {
+          en: formValue.professionalTitleEn,
+          ar: formValue.professionalTitleAr
+        },
+        biography: {
+          en: formValue.biographyEn,
+          ar: formValue.biographyAr
+        },
+        expertiseAreas: {
+          en: formValue.expertiseAreasEn.split(',').map((s: string) => s.trim()),
+          ar: formValue.expertiseAreasAr ? formValue.expertiseAreasAr.split(',').map((s: string) => s.trim()) : []
+        },
+        yearsOfExperience: formValue.yearsOfExperience,
+        socialMediaLinks: {
+          linkedin: formValue.linkedin,
+          twitter: formValue.twitter,
+          youtube: formValue.youtube,
+          website: formValue.website
+        },
         approvalStatus: formValue.approvalStatus
       };
+
       this.instructorsService.updateInstructor(updatedInstructor).subscribe({
         next: () => {
           this.loadInstructors();

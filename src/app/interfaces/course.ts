@@ -1,4 +1,16 @@
 export interface Course {
+<<<<<<< HEAD
+=======
+  courseCount: number;
+  instructor: string;
+  topic: string;
+  isFree: boolean;
+  duration: number;
+  language: string;
+  level: string;
+  lessonsCount: number;
+  name: any;
+>>>>>>> origin/main
   _id: string;
   
   title: {

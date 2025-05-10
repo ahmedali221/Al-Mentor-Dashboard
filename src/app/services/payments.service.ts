@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Payment } from '../interfaces/payment';
 import { Observable } from 'rxjs';
+import { User } from '../interfaces/user.interface';
+import { Subscription } from '../interfaces/subscriptions';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +11,7 @@ import { Observable } from 'rxjs';
 export class PaymentsService {
   private baseUrl = 'http://localhost:5000/api/payments';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getPayments(): Observable<Payment[]> {
     return this.http.get<Payment[]>(this.baseUrl);
@@ -19,14 +21,16 @@ export class PaymentsService {
     return this.http.get<Payment[]>(`${this.baseUrl}/user/${userId}`);
   }
 
+
   createPayment(data: {
-    userId: string;
-    subscriptionName: string;
+    user: string;
+    subscription: string;
     amount: number;
+    currency: string;
     transactionId: string;
+    status: { en: string; ar: string };
+    paymentMethod: string;
   }): Observable<any> {
     return this.http.post(this.baseUrl, data);
   }
-
- 
 }

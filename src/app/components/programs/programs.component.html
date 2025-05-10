@@ -15,14 +15,6 @@
         </div>
       </mat-card-content>
     </mat-card>
-    <mat-card>
-      <mat-card-content>
-        <div>
-          <h3>Total Courses</h3>
-          <p>{{ getTotalICourses() || 0 }}</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
   </div>
 
   <div class="search-container">
@@ -42,31 +34,30 @@
 
   <mat-card>
     <mat-card-content>
-      <mat-chip-listbox>
-        @for (field of programFields; track field) {
+      <mat-chip-listbox aria-label="Category filter">
         <mat-chip-option 
-          [color]="selectedField === field ? 'accent' : 'primary'"
-          [selected]="selectedField === field"
-          (click)="onFieldClick(field)">
-          {{ field | titlecase }}
+          *ngFor="let category of categories; trackBy: trackByCategoryId"
+          [selected]="selectedField === category.name.en"
+          (click)="onFieldClick(category.name.en)">
+          {{ category.name.en | titlecase }}
         </mat-chip-option>
-        }
       </mat-chip-listbox>
     </mat-card-content>
   </mat-card>
+
   <mat-card>
     <mat-card-content>
       <table mat-table [dataSource]="filteredPrograms">
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef>Title</th>
           <td mat-cell *matCellDef="let program">
-            {{ program.title | titlecase }}
+            {{ program.title.en | titlecase }}
           </td>
         </ng-container>
         <ng-container matColumnDef="level">
           <th mat-header-cell *matHeaderCellDef>Level</th>
           <td mat-cell *matCellDef="let program">
-            {{ program.level | titlecase }}
+            {{ program.level.en | titlecase }}
           </td>
         </ng-container>
         <ng-container matColumnDef="language">
@@ -78,7 +69,7 @@
         <ng-container matColumnDef="category">
           <th mat-header-cell *matHeaderCellDef>Category</th>
           <td mat-cell *matCellDef="let program">
-            {{ program.category | titlecase }}
+            {{ program.category.en | titlecase }}
           </td>
         </ng-container>
         <ng-container matColumnDef="totalDuration">
@@ -90,7 +81,7 @@
         <ng-container matColumnDef="Courses">
           <th mat-header-cell *matHeaderCellDef>Associated Courses</th>
           <td mat-cell *matCellDef="let program">
-            {{ program.courses.length || 0 }} <span>Courses</span>
+            {{ program.courses.length || 0 }}
           </td>
         </ng-container>
         <ng-container matColumnDef="actions">
@@ -99,14 +90,14 @@
             <button
               mat-icon-button
               color="primary"
-              (click)="openUpdateForm(program)"
+              (click)="openUpdateForm(program, $event)"
             >
               <mat-icon>edit</mat-icon>
             </button>
             <button
               mat-icon-button
               color="warn"
-              (click)="deleteProgram(program.id)"
+              (click)="deleteProgram(program.id, $event)"
             >
               <mat-icon>delete</mat-icon>
             </button>
@@ -138,44 +129,85 @@
       >
         <div class="grid-container">
           <div>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Title</mat-label>
-              <input matInput formControlName="title" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Slug</mat-label>
-              <input matInput formControlName="slug" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description"></textarea>
-            </mat-form-field>
+            <div formGroupName="title">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Title (EN)</mat-label>
+                <input matInput formControlName="en" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Title (AR)</mat-label>
+                <input matInput formControlName="ar" />
+              </mat-form-field>
+            </div>
+            <div formGroupName="slug">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Slug (EN)</mat-label>
+                <input matInput formControlName="en" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Slug (AR)</mat-label>
+                <input matInput formControlName="ar" />
+              </mat-form-field>
+            </div>
+            <div formGroupName="description">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description (EN)</mat-label>
+                <textarea matInput formControlName="en"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description (AR)</mat-label>
+                <textarea matInput formControlName="ar"></textarea>
+              </mat-form-field>
+            </div>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Thumbnail URL</mat-label>
               <input matInput formControlName="thumbnail" />
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Level</mat-label>
-              <mat-select formControlName="level">
-                <mat-option value="beginner">Beginner</mat-option>
-                <mat-option value="intermediate">Intermediate</mat-option>
-                <mat-option value="advanced">Advanced</mat-option>
-              </mat-select>
-            </mat-form-field>
+            <div formGroupName="level">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Level (EN)</mat-label>
+                <mat-select formControlName="en">
+                  <mat-option value="beginner">Beginner</mat-option>
+                  <mat-option value="intermediate">Intermediate</mat-option>
+                  <mat-option value="advanced">Advanced</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Level (AR)</mat-label>
+                <mat-select formControlName="ar">
+                  <mat-option value="مبتدئ">مبتدئ</mat-option>
+                  <mat-option value="متوسط">متوسط</mat-option>
+                  <mat-option value="متقدم">متقدم</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Language</mat-label>
-              <input matInput formControlName="language" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Category</mat-label>
-              <mat-select formControlName="category">
-                <mat-option value="language">Language</mat-option>
-                <mat-option value="business">Business</mat-option>
-                <mat-option value="development">Development</mat-option>
+              <mat-select formControlName="language">
+                <mat-option value="en">English</mat-option>
+                <mat-option value="ar">Arabic</mat-option>
               </mat-select>
             </mat-form-field>
+            <div formGroupName="category">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Category (EN)</mat-label>
+                <mat-select formControlName="en">
+                  <mat-option *ngFor="let category of categories" [value]="category.name.en">
+                    {{ category.name.en | titlecase }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Category (AR)</mat-label>
+                <mat-select formControlName="ar">
+                  <mat-option *ngFor="let category of categories" [value]="category.name.ar">
+                    {{ category.name.ar }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Total Duration</mat-label>
               <input matInput type="number" formControlName="totalDuration" />

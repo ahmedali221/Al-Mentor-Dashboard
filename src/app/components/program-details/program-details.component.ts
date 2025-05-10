@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProgramsService } from '../../services/programs.service';
+import { CoursesService } from '../../services/course.service';
 import { program } from '../../interfaces/program.interface';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -13,11 +14,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatList, MatListItem } from '@angular/material/list';
+import { Course } from '../../interfaces/course';
 
 @Component({
   selector: 'app-program-details',
   standalone: true,
-  imports: [CommonModule, MatInputModule, MatSelectModule, FormsModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatFormFieldModule],
+  imports: [CommonModule, MatInputModule, MatList, MatListItem, MatSelectModule, FormsModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatFormFieldModule],
   templateUrl: './program-details.component.html',
   styleUrl: './program-details.component.scss'
 })
@@ -26,11 +29,14 @@ export class ProgramDetailsComponent implements OnInit {
   loading = true;
   updateForm!: FormGroup;
   selectedProgram!: program;
-
+  allCourses: Course[] = [];
+  unassociatedCourses: Course[] = [];
+  selectedCourseId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private programsService: ProgramsService,
+    private coursesService: CoursesService,
     private location: Location,
     private fb: FormBuilder,
 
@@ -77,8 +83,18 @@ export class ProgramDetailsComponent implements OnInit {
     if (programId) {
       this.programsService.getProgramById(programId).subscribe({
         next: (program) => {
-          this.program = program;
+          this.program = {
+            ...program,
+            courses: program.courses?.map(c => ({
+              ...c,
+              title: {
+                en: c.title?.en || 'Untitled Course',
+                ar: c.title?.ar || ''
+              },
+            })) || []
+          };
           this.loading = false;
+          this.loadCourses();
         },
         error: () => {
           this.loading = false;
@@ -87,7 +103,48 @@ export class ProgramDetailsComponent implements OnInit {
     }
   }
 
+  loadCourses() {
+    this.coursesService.getCourses().subscribe({
+      next: (courses) => {
+        this.allCourses = courses;
+        this.updateUnassociatedCourses();
+      }
+    });
+  }
 
+  updateUnassociatedCourses() {
+    if (this.program && this.allCourses) {
+      this.unassociatedCourses = this.allCourses.filter(course =>
+        !this.program.courses.some(programCourse => programCourse._id === course._id)
+      );
+    }
+  }
+
+  addCourseToProgram() {
+    if (this.selectedCourseId && this.program) {
+      const courseToAdd = this.allCourses.find(c => c._id === this.selectedCourseId);
+      if (courseToAdd) {
+        this.program.courses.push(courseToAdd);
+        this.programsService.updateProgram(this.program).subscribe({
+          next: () => {
+            this.updateUnassociatedCourses();
+            this.selectedCourseId = null;
+          }
+        });
+      }
+    }
+  }
+
+  removeCourseFromProgram(courseId: string) {
+    if (this.program) {
+      this.program.courses = this.program.courses.filter(c => c._id !== courseId);
+      this.programsService.updateProgram(this.program).subscribe({
+        next: () => {
+          this.updateUnassociatedCourses();
+        }
+      });
+    }
+  }
 
   updateProgram(): void {
     if (this.updateForm.valid) {

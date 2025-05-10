@@ -1,73 +1,269 @@
 <div class="payments-container">
-    <h2>Payments</h2>
-  
-    <button mat-raised-button color="primary" (click)="openAddDialog()">
+  <div class="header">
+    <h1>Payments Management</h1>
+    <button
+      mat-flat-button
+      color="primary"
+      class="add-button"
+      (click)="openAddDialog()"
+    >
+      <mat-icon>add</mat-icon>
       Add Payment
     </button>
-  
-    <table mat-table [dataSource]="payments" class="mat-elevation-z2" style="width:100%;margin:1rem 0">
-      <ng-container matColumnDef="user">
-        <th mat-header-cell *matHeaderCellDef>User</th>
-        <td mat-cell *matCellDef="let p">
-          {{ p.user?.username || p.user }}
-        </td>
-      </ng-container>
-  
-      <ng-container matColumnDef="subscription">
-        <th mat-header-cell *matHeaderCellDef>Subscription</th>
-        <td mat-cell *matCellDef="let p">
-          {{ p.subscription?.displayName?.en || p.subscription }}
-        </td>
-      </ng-container>
-  
-      <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef>Amount</th>
-        <td mat-cell *matCellDef="let p">{{ p.amount }}</td>
-      </ng-container>
-  
-      <ng-container matColumnDef="transactionId">
-        <th mat-header-cell *matHeaderCellDef>Transaction Id</th>
-        <td mat-cell *matCellDef="let p">{{ p.transactionId }}</td>
-      </ng-container>
-  
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
-  
-    <!-- Dialog for Adding Payment -->
-    <ng-template #paymentDialog>
-        <div class="dialog-container">
-          <h2 class="dialog-title">Add Payment</h2>
-          <form [formGroup]="paymentForm" (ngSubmit)="savePayment()" class="payment-form">
-      
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>User</mat-label>
-              <mat-select formControlName="userId">
-                <mat-option *ngFor="let user of userList" [value]="user._id">{{ user.username }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-            
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Subscription</mat-label>
-              <mat-select formControlName="subscriptionName">
-                <mat-option *ngFor="let sub of subscriptionList" [value]="sub.name">{{ sub.displayName.en }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-      
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Amount</mat-label>
-              <input matInput formControlName="amount" type="number">
-            </mat-form-field>
-            
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Transaction ID</mat-label>
-              <input matInput formControlName="transactionId">
-            </mat-form-field>
-      
-            <div class="dialog-actions">
-              <button mat-raised-button color="primary" type="submit" [disabled]="paymentForm.invalid">Save</button>
-            </div>
-          </form>
-        </div>
-      </ng-template>
   </div>
+
+  <div class="cards-row">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <h3>Total Payments</h3>
+          <p class="summary-value">{{ filteredPayments.length }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="search-filter-row">
+    <!-- Add search input for username -->
+    <mat-form-field appearance="outline" class="search-input">
+      <mat-label>Search by Username</mat-label>
+      <input
+        matInput
+        [(ngModel)]="searchTerm"
+        placeholder="Enter username"
+        (keyup)="applyFilter()"
+      />
+      <button
+        *ngIf="searchTerm"
+        matSuffix
+        mat-icon-button
+        aria-label="Clear"
+        (click)="searchTerm = ''; applyFilter()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <!-- Add subscription filter -->
+    <mat-form-field appearance="outline" class="filter-dropdown">
+      <mat-label>Filter by Subscription</mat-label>
+      <mat-select
+        [(ngModel)]="selectedSubscription"
+        (selectionChange)="onSubscriptionFilterChange()"
+      >
+        <mat-option [value]="">All Subscriptions</mat-option>
+        <mat-option *ngFor="let sub of subscriptionList" [value]="sub._id">
+          {{ sub.displayName.en }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-dropdown">
+      <mat-label>Filter by Status</mat-label>
+      <mat-select
+        [(ngModel)]="selectedStatus"
+        (selectionChange)="onStatusFilterChange()"
+      >
+        <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-dropdown">
+      <mat-label>Filter by Payment Method</mat-label>
+      <mat-select
+        [(ngModel)]="selectedPaymentMethod"
+        (selectionChange)="onPaymentMethodFilterChange()"
+      >
+        <mat-option
+          *ngFor="let option of paymentMethodOptions"
+          [value]="option.value"
+        >
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="filter-actions">
+    <button
+      mat-button
+      color="primary"
+      (click)="clearFilters()"
+      *ngIf="
+        searchTerm ||
+        selectedSubscription ||
+        selectedStatus ||
+        selectedPaymentMethod
+      "
+    >
+      <mat-icon>clear_all</mat-icon>
+      Clear All Filters
+    </button>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <table mat-table [dataSource]="filteredPayments" class="mat-elevation-z1">
+        <!-- User Column -->
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td mat-cell *matCellDef="let p">
+            {{ p.user?.username || p.user }}
+          </td>
+        </ng-container>
+
+        <!-- Subscription Column -->
+        <ng-container matColumnDef="subscription">
+          <th mat-header-cell *matHeaderCellDef>Subscription</th>
+          <td mat-cell *matCellDef="let p">
+            {{
+              p.subscription?.displayName?.en ||
+                p.subscription?.name ||
+                p.subscription
+            }}
+          </td>
+        </ng-container>
+
+        <!-- Amount Column -->
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef>Amount</th>
+          <td mat-cell *matCellDef="let p">{{ p.amount }}</td>
+        </ng-container>
+
+        <!-- Transaction Id Column -->
+        <ng-container matColumnDef="transactionId">
+          <th mat-header-cell *matHeaderCellDef>Transaction Id</th>
+          <td mat-cell *matCellDef="let p">{{ p.transactionId }}</td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let p">
+            {{ p.status?.en || p.status || "N/A" }}
+          </td>
+        </ng-container>
+
+        <!-- Payment Method Column -->
+        <ng-container matColumnDef="paymentMethod">
+          <th mat-header-cell *matHeaderCellDef>Payment Method</th>
+          <td mat-cell *matCellDef="let p">
+            {{ p.paymentMethod || "N/A" }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column (optional, add buttons if needed) -->
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let p">
+            <button mat-icon-button color="primary">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Add Payment Dialog -->
+  <!-- Add Payment Dialog -->
+  <ng-template #paymentDialog>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Add Payment</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form
+          [formGroup]="paymentForm"
+          (ngSubmit)="savePayment()"
+          class="payment-form"
+        >
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>User</mat-label>
+            <mat-select formControlName="user">
+              <mat-option *ngFor="let user of userList" [value]="user._id">
+                {{ user.username }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Subscription</mat-label>
+            <mat-select formControlName="subscription">
+              <mat-option
+                *ngFor="let sub of subscriptionList"
+                [value]="sub._id"
+              >
+                {{ sub.displayName.en }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Amount</mat-label>
+            <input matInput formControlName="amount" type="number" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Transaction ID</mat-label>
+            <input matInput formControlName="transactionId" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Currency</mat-label>
+            <mat-select formControlName="currency">
+              <mat-option value="USD">USD</mat-option>
+              <mat-option value="EGP">EGP</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Payment Method</mat-label>
+            <mat-select formControlName="paymentMethod">
+              <mat-option value="credit_card">Credit Card</mat-option>
+              <mat-option value="paypal">PayPal</mat-option>
+              <mat-option value="bank_transfer">Bank Transfer</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Status-en</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="Paid">Paid</mat-option>
+              <mat-option value="Pending">Pending</mat-option>
+              <mat-option value="Failed">Failed</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Status-ar</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="Paid">مكتمل </mat-option>
+              <mat-option value="Pending">قيد الانتظار</mat-option>
+              <mat-option value="Failed">فشل</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="paymentForm.invalid"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+</div>

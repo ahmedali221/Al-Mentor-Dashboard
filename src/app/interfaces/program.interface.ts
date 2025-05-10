@@ -1,19 +1,19 @@
 import { Course } from "./course";
+import { MultilingualString } from "./multilingual-string.interface";
 
 export interface program {
     _id: string;
-    title: string;
+    title: MultilingualString;
     slug: string;
-    description: string;
+    description: MultilingualString;
     thumbnail: string;
-    level: "beginner" | "intermediate" | "advanced";
+    level: MultilingualString;
     language: string;
     totalDuration: number;
     courses: Course[];
     learningOutcomes: string[];
-    category: "language" | "business" | "development";
-    coursesDetails: string[]
-
+    category: MultilingualString;
+    coursesDetails: string[];
 }
 
 
