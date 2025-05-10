@@ -1,29 +1,70 @@
-
-import { MultilingualString } from './multilingual-string.interface';
-
 export interface Course {
-  courseCount: number;
-  instructor: string;
-  topic: string;
-  isFree: boolean;
-  duration: number;
-  language: string;
-  level: string;
-  lessonsCount: number;
-  name: any;
   _id: string;
-  status: string;
-  title: MultilingualString;
-  description: MultilingualString;
-  slug: string;
-  topicId: string;
-  thumbnailImgUrl?: string;
-  availableLanguages: string[];
-  order: number;
-  isPublished: boolean;
+  
+  title: {
+    en: string;
+    ar: string;
+  };
+  slug: {
+    en: string;
+    ar: string;
+  };
+  topic: string; 
+  subtopic?: string; 
+  instructor: string; 
+  category: string; 
+  
+
+  description: {
+    en: string;
+    ar: string;
+  };
+  shortDescription?: {
+    en?: string;
+    ar?: string;
+  };
+  modules?: string[]; 
+  freeLessons?: {
+    lessonId: string;
+    title: string;
+    duration: number;
+  }[];
+  
+  
+  level: {
+    en: 'beginner' | 'intermediate' | 'advanced';
+    ar: 'مبتدئ' | 'متوسط' | 'متقدم';
+  };
+
+  duration: number;
+  lastUpdated: Date;
+  
+
+  enrollmentCount: number;
+  isFree: boolean;
+  rating: {
+    average: number;
+    count: number;
+  };
+
   createdAt: Date;
   updatedAt: Date;
-  instructorName: string;
+
+  instructorDetails?: {
+    user: string;
+    expertiseAreas: any;
+    profile: any;
+  };
+  
+  status?: string;
+  thumbnailImgUrl?: string;
+  availableLanguages?: string[];
+  order?: number;
+  isPublished?: boolean;
+  instructorName?: string;
+  lessonsCount?: number;
+  courseCount?: number;
+  topicId?: string;
 }
 
 export interface TableColumn {

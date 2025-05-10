@@ -1,6 +1,6 @@
 export interface Lesson {
   availableLanguages: any;
-  _id: string;
+ _id: string;
   title: {
     en: string;
     ar: string;
@@ -31,8 +31,8 @@ export interface Lesson {
   isPublished?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  courseId?: string;
-  courseName?: string;
-  status?: string;
-}
-
+  courseId?: string; // added
+  courseName?: string; // added
+  status?: string; // added
+  }
+  

@@ -32,9 +32,7 @@ import { debounceTime } from 'rxjs/operators';
   ],
   templateUrl: './topics.component.html',
   styleUrls: ['./topics.component.scss']
-  styleUrls: ['./topics.component.scss']
 })
-export class TopicsComponent implements AfterViewInit, OnInit {
 export class TopicsComponent implements AfterViewInit, OnInit {
   dataSource = new MatTableDataSource<Topic>();
   displayedColumns: string[] = ['name', 'slug', 'description', 'languages', 'order', 'courseCount', 'actions'];
@@ -42,7 +40,6 @@ export class TopicsComponent implements AfterViewInit, OnInit {
   updateForm: FormGroup;
   selectedTopic: Topic | null = null;
   searchControl = new FormControl('');
-  isLoading: boolean = false;
   isLoading: boolean = false;
 
   @ViewChild('addDialog') addDialog!: TemplateRef<any>;
@@ -94,8 +91,8 @@ export class TopicsComponent implements AfterViewInit, OnInit {
     });
   }
 
- ngOnInit() {
-    this.loadTopics(); 
+  ngOnInit() {
+    this.loadTopics();
   }
 
   ngAfterViewInit() {
@@ -124,7 +121,7 @@ export class TopicsComponent implements AfterViewInit, OnInit {
 
     this.topicsService.getTopics().subscribe({
       next: (data) => {
-        this.dataSource = new MatTableDataSource(data); 
+        this.dataSource = new MatTableDataSource(data);
         this.dataSource.filterPredicate = (data: Topic, filter: string) => {
           const target = filter.toLowerCase();
           return (
@@ -137,7 +134,7 @@ export class TopicsComponent implements AfterViewInit, OnInit {
           );
         };
 
-        this.applyFilter(); 
+        this.applyFilter();
       },
       error: (err) => {
         console.error('Error loading topics:', err);
