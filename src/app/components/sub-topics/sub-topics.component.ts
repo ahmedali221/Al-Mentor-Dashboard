@@ -39,7 +39,7 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class SubTopicsComponent implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<Subtopics>();
-  displayedColumns: string[] = ['name', 'slug', 'order', 'isFeatured', 'actions'];
+  displayedColumns: string[] = ['name', 'slug', 'order', 'isFeatured', 'actions', 'category'];
   addForm: FormGroup;
   updateForm: FormGroup;
   selectedSubTopic: Subtopics | null = null;
@@ -63,6 +63,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       }),
       slug: ['', Validators.required],
       topic: ['', Validators.required],
+      category: ['', Validators.required],
       description: this.fb.group({
         en: [''],
         ar: ['']
@@ -210,6 +211,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       },
       slug: subTopic.slug,
       topic: subTopic.topic,
+      category: subTopic.category,
       description: {
         en: subTopic.description?.en || '',
         ar: subTopic.description?.ar || ''

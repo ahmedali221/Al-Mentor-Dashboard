@@ -6,7 +6,10 @@ export interface Topic {
     en: string;
     ar?: string;
   };
-  slug: string;
+  slug: {
+    en: string;
+    ar?: string;
+  };
   description: {
     en: string;
     ar?: string;
@@ -17,4 +20,5 @@ export interface Topic {
   courseCount: number;
   createdAt?: string;
   updatedAt?: string;
+  category: string;
 }
