@@ -94,7 +94,7 @@ export class TopicsComponent implements AfterViewInit, OnInit {
       const lowerCaseFilter = filter.trim().toLowerCase();
       return (
         (data.name?.ar?.toLowerCase().includes(lowerCaseFilter) || false) ||
-        (data.slug?.toLowerCase().includes(lowerCaseFilter) || false) ||
+        (data.slug?.en.toLowerCase().includes(lowerCaseFilter) || false) ||
         (data.description?.en?.toLowerCase().includes(lowerCaseFilter) || false) ||
         (data.description?.ar?.toLowerCase().includes(lowerCaseFilter) || false)
       );

@@ -39,7 +39,6 @@ export class DashboardComponent {
 
     // Programs
     { path: '/programs', icon: 'library_books', label: 'Programs' },
-    { path: '/topics', icon: 'topic', label: 'Topics' },
     { path: '/subscriptions', icon: 'subscriptions', label: 'subscriptions' },
     {
       path: '/userSubscriptions',

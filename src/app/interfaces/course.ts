@@ -1,4 +1,6 @@
 
+import { MultilingualString } from './multilingual-string.interface';
+
 export interface Course {
   courseCount: number;
   instructor: string;
@@ -11,14 +13,8 @@ export interface Course {
   name: any;
   _id: string;
   status: string;
-  title: {
-    en: string;
-    ar?: string;
-  };
-  description: {
-    en: string;
-    ar?: string;
-  };
+  title: MultilingualString;
+  description: MultilingualString;
   slug: string;
   topicId: string;
   thumbnailImgUrl?: string;

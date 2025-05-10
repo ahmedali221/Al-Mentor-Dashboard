@@ -57,12 +57,8 @@ export class CoursesComponent implements OnInit {
 
     this.loadCourses();
     this.loadTopics();
-    this.searchControl.valueChanges.subscribe(() => {
-      this.filterCourses();
-    });
-    this.selectedTopic.valueChanges.subscribe(() => {
-      this.filterCoursesTopic();
-    });
+    this.searchControl.valueChanges.subscribe(() => this.filterCourses());
+    this.selectedTopic.valueChanges.subscribe(() => this.filterCourses());
   }
 
   constructor(
@@ -340,18 +336,21 @@ export class CoursesComponent implements OnInit {
     this.dialog.closeAll();
   }
 
-  // Filter courses
+  // Update filter method to handle multilingual fields
   filterCourses() {
     const search = this.searchControl.value?.toLowerCase() || '';
     const topic = this.selectedTopic.value || '';
+    
     this.filteredCourses = this.courses.filter(course => {
-      const matchesSearch =
+      const matchesSearch = 
         course.title?.en?.toLowerCase().includes(search) ||
-        course.slug?.toLowerCase().includes(search) ||
-        course.instructor?.toLowerCase().includes(search);
-      return matchesSearch;
+        course.title?.ar?.toLowerCase().includes(search) ||
+        course.slug?.toLowerCase().includes(search);
+      
+      const matchesTopic = !topic || course.topic === topic;
+      
+      return matchesSearch && matchesTopic;
     });
-
   }
   // Filter courses by topic
   filterCoursesTopic() {
