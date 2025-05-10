@@ -1,0 +1,128 @@
+.payments-container {
+  padding: 24px;
+  background-color: var(--background-color);
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+      color: var(--text-dark);
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .add-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+    }
+  }
+
+  .cards-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .summary-card {
+      flex: 1;
+      background-color: var(--card-background);
+      color: var(--text-dark);
+      text-align: center;
+
+      h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .summary-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--primary-color);
+      }
+    }
+  }
+
+  .search-filter-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .search-bar,
+    .filter-dropdown {
+      flex: 1;
+
+      mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+// Dialog styles (keep your custom dialog styles)
+::ng-deep .mat-dialog-container {
+  border-radius: 16px;
+  padding: 0 !important;
+  box-shadow: 0 12px 48px 0 rgba(30, 34, 40, 0.18);
+}
+
+.dialog-container {
+  background: #f8f9fa;
+  padding: 28px 26px 18px 26px;
+  min-width: 350px;
+  border-radius: 16px;
+
+  .dialog-title {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #000000;
+    letter-spacing: 0.02rem;
+  }
+
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    .full-width {
+      width: 100%;
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+    margin-bottom: 4px;
+
+    button[mat-raised-button] {
+      min-width: 110px;
+      border-radius: 24px;
+      font-weight: 600;
+      text-transform: capitalize;
+      background: linear-gradient(90deg, #eb2027 20%, #eb2027cb 90%);
+      color: #fff;
+      box-shadow: 0 2px 12px 0 rgba(25, 118, 210, 0.06);
+
+      &:hover,
+      &:focus {
+        background: linear-gradient(90deg, #eb2027 20%, #eb2027d0 90%);
+      }
+    }
+  }
+}

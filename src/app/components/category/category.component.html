@@ -1,0 +1,262 @@
+<div class="topics-container">
+  <div class="header">
+    <h1>Category Management</h1>
+    <button mat-flat-button color="primary" (click)="openAddForm()">
+      <mat-icon>add</mat-icon>
+      Add New Category
+    </button>
+  </div>
+
+  <div class="cards-row">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <h3>Total Categories</h3>
+          <p class="summary-value">{{ dataSource.data.length || 0 }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="search-filter-row">
+    <mat-form-field appearance="outline" class="search-bar">
+      <mat-label>Search Categories</mat-label>
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Search by name or slug..."
+      />
+      <button
+        *ngIf="searchControl.value"
+        matSuffix
+        mat-icon-button
+        aria-label="Clear"
+        (click)="clearSearch()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <!-- If you want to add a filter dropdown, add it here -->
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        *ngIf="!isLoading"
+        class="mat-elevation-z1"
+      >
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let category">{{ category.name?.en }}</td>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let category">
+            {{ category.description?.en }}
+          </td>
+        </ng-container>
+
+        <!-- Order Column -->
+        <ng-container matColumnDef="order">
+          <th mat-header-cell *matHeaderCellDef>Order</th>
+          <td mat-cell *matCellDef="let category">{{ category.order }}</td>
+        </ng-container>
+
+        <!-- Category Count Column -->
+        <ng-container matColumnDef="categoryCount">
+          <th mat-header-cell *matHeaderCellDef>Category Count</th>
+          <td mat-cell *matCellDef="let category">
+            {{ category.courses?.length || 0 }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let category">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="openUpdateForm(category)"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteCategory(category._id)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Add Dialog -->
+  <ng-template #addDialog>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Add New Category</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form
+          [formGroup]="addForm"
+          (ngSubmit)="addCategory()"
+          class="topic-form-grid"
+        >
+          <div class="grid-container">
+            <!-- Name and Description -->
+            <div>
+              <div formGroupName="name">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Name (EN)</mat-label>
+                  <input matInput formControlName="en" required />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Name (AR)</mat-label>
+                  <input matInput formControlName="ar" />
+                </mat-form-field>
+              </div>
+
+              <div formGroupName="description">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description (EN)</mat-label>
+                  <textarea matInput formControlName="en" required></textarea>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description (AR)</mat-label>
+                  <textarea matInput formControlName="ar"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Image, Languages, Order, Count -->
+            <div>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Thumbnail URL</mat-label>
+                <input matInput formControlName="thumbnailImgUrl" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Languages</mat-label>
+                <mat-select formControlName="availableLanguages" multiple>
+                  <mat-option value="en">English</mat-option>
+                  <mat-option value="ar">Arabic</mat-option>
+                  <mat-option value="fr">French</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Order</mat-label>
+                <input matInput type="number" formControlName="order" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="addForm.invalid"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+  <!-- Update Dialog -->
+  <ng-template #updateDialog>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Update Category</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form
+          [formGroup]="updateForm"
+          (ngSubmit)="updateCategory()"
+          class="topic-form-grid"
+        >
+          <div class="grid-container">
+            <!-- Same style like Add -->
+            <div>
+              <div formGroupName="name">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Name (EN)</mat-label>
+                  <input matInput formControlName="en" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Name (AR)</mat-label>
+                  <input matInput formControlName="ar" />
+                </mat-form-field>
+              </div>
+
+              <div formGroupName="description">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description (EN)</mat-label>
+                  <textarea matInput formControlName="en"></textarea>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description (AR)</mat-label>
+                  <textarea matInput formControlName="ar"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Thumbnail URL</mat-label>
+                <input matInput formControlName="thumbnailImgUrl" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Languages</mat-label>
+                <mat-select formControlName="availableLanguages" multiple>
+                  <mat-option value="en">English</mat-option>
+                  <mat-option value="ar">Arabic</mat-option>
+                  <mat-option value="fr">French</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Order</mat-label>
+                <input matInput type="number" formControlName="order" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="closeDialog()">
+              Cancel
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="updateForm.invalid"
+            >
+              Update
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+</div>

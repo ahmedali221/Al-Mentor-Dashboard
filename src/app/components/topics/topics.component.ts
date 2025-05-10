@@ -32,7 +32,9 @@ import { debounceTime } from 'rxjs/operators';
   ],
   templateUrl: './topics.component.html',
   styleUrls: ['./topics.component.scss']
+  styleUrls: ['./topics.component.scss']
 })
+export class TopicsComponent implements AfterViewInit, OnInit {
 export class TopicsComponent implements AfterViewInit, OnInit {
   dataSource = new MatTableDataSource<Topic>();
   displayedColumns: string[] = ['name', 'slug', 'description', 'languages', 'order', 'courseCount', 'actions'];
@@ -40,6 +42,7 @@ export class TopicsComponent implements AfterViewInit, OnInit {
   updateForm: FormGroup;
   selectedTopic: Topic | null = null;
   searchControl = new FormControl('');
+  isLoading: boolean = false;
   isLoading: boolean = false;
 
   @ViewChild('addDialog') addDialog!: TemplateRef<any>;
@@ -96,8 +99,18 @@ export class TopicsComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
+    this.dataSource.filterPredicate = (data: Topic, filter: string) => {
+      const lowerCaseFilter = filter.trim().toLowerCase();
+      return (
+        (data.name?.ar?.toLowerCase().includes(lowerCaseFilter) || false) ||
+        (data.slug?.toLowerCase().includes(lowerCaseFilter) || false) ||
+        (data.description?.en?.toLowerCase().includes(lowerCaseFilter) || false) ||
+        (data.description?.ar?.toLowerCase().includes(lowerCaseFilter) || false)
+      );
+    };
+
     this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe((value) => {
-      this.applyFilter();
+      this.dataSource.filter = value?.trim().toLowerCase() || '';
     });
   }
 
@@ -198,8 +211,7 @@ export class TopicsComponent implements AfterViewInit, OnInit {
       thumbnailImgUrl: topic.thumbnailImgUrl || '',
       availableLanguages: topic.availableLanguages || [],
       order: topic.order || 0,
-      courseCount: topic.courseCount || 0,
-      category: topic.category || ''
+      courseCount: topic.courseCount || 0
     });
     this.dialog.open(this.updateDialog, { width: '600px' });
   }
@@ -209,6 +221,8 @@ export class TopicsComponent implements AfterViewInit, OnInit {
   }
 
   clearSearch() {
+    this.searchControl.reset();
+    this.applyFilter();
     this.searchControl.reset();
     this.applyFilter();
   }

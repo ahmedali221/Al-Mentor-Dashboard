@@ -10,7 +10,7 @@ describe('SubTopicsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SubTopicsComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(SubTopicsComponent);
     component = fixture.componentInstance;
