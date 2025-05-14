@@ -155,14 +155,15 @@
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Course</mat-label>
-          <mat-select formControlName="courseId" required>
-            <mat-option *ngFor="let course of courses" [value]="course._id">
-              {{ course.title.en }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+<mat-form-field appearance="outline" class="full-width">
+  <mat-label>Course</mat-label>
+  <mat-select formControlName="courseId" required>
+    <mat-option *ngFor="let course of courses" [value]="course._id">
+      {{ course.title.en }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Duration (minutes)</mat-label>

@@ -10,6 +10,14 @@ export interface Lesson {
     en?: string;
     ar?: string;
   };
+  courseId?: string; // لو شغال بـ ID فقط
+  course?: {
+    _id: string;
+    title: {
+      en: string;
+      ar?: string;
+    };
+  };
   order: number;
   duration?: number;
   content?: {
@@ -31,8 +39,7 @@ export interface Lesson {
   isPublished?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  courseId?: string; // added
-  courseName?: string; // added
-  status?: string; // added
+  // courseId?: string; 
+  courseName?: string; 
+  status?: string; 
 }
-
