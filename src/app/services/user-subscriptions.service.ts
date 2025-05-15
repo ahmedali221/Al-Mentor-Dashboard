@@ -74,40 +74,31 @@ export class UserSubscriptionsService {
       .pipe(catchError(this.handleError));
   }
 
-  toggleSubscriptionStatus(
-    id: string,
-    currentStatus: 'active' | 'canceled'
-  ): Observable<UserSubscriptions> {
-    if (!id) {
-      console.error('ID is required for toggling status');
-      return throwError(() => new Error('ID is required'));
+  cancelSubscription(_id: string): Observable<void> {
+    if (!_id) {
+      return throwError(() => new Error('Subscription ID is required'));
     }
 
-    const newStatus = currentStatus === 'active' ? 'canceled' : 'active';
-    const url = `http://localhost:5000/api/user-subscriptions/cancel/${id}`;
+    const url = `${environment.apiUrl}/user-subscriptions/cancel/${_id}`;
+    return this.http.put<void>(url, {}).pipe(catchError(this.handleError));
+  }
 
-    return this.http.put<UserSubscriptions>(url, { status: newStatus }).pipe(
-      catchError((error) => {
-        return throwError(
-          () =>
-            new Error(error.message || 'Failed to toggle subscription status')
-        );
-      })
-    );
+  reactivateSubscription(_id: string): Observable<void> {
+    if (!_id) {
+      return throwError(() => new Error('Subscription ID is required'));
+    }
+
+    const url = `${environment.apiUrl}/user-subscriptions/activate/${_id}`;
+    return this.http.put<void>(url, {}).pipe(catchError(this.handleError));
   }
 
   createUserSubscription(data: {
     userId: string;
     subscriptionId: string;
   }): Observable<UserSubscriptions> {
-    const url = `http://localhost:5000/api/subscriptions/user`;
-    return this.http.post<UserSubscriptions>(url, data).pipe(
-      catchError((error) => {
-        console.error('Error creating user subscription:', error);
-        return throwError(
-          () => new Error(error.message || 'Failed to create user subscription')
-        );
-      })
-    );
+    const url = `${environment.apiUrl}/user-subscriptions/user`;
+    return this.http
+      .post<UserSubscriptions>(url, data)
+      .pipe(catchError(this.handleError));
   }
 }
