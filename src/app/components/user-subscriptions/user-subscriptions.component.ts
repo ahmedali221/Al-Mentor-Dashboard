@@ -41,7 +41,7 @@ import { CommonModule } from '@angular/common';
 export class UserSubscriptionsComponent implements OnInit {
   displayedColumns: string[] = [
     'userId',
-    'subscriptionId',
+    'subscriptionId', // Now shows subscription.name
     'startDate',
     'endDate',
     'status',
@@ -62,6 +62,7 @@ export class UserSubscriptionsComponent implements OnInit {
     private fb: FormBuilder,
     private dialog: MatDialog
   ) {
+    // Initialize Add User Subscription Form
     this.addUserSubscriptionForm = this.fb.group({
       userId: ['', Validators.required],
       subscriptionId: ['', Validators.required],
@@ -75,11 +76,14 @@ export class UserSubscriptionsComponent implements OnInit {
   loadUserSubscriptions() {
     this.userSubscriptionsService.getAll().subscribe({
       next: (subscriptions) => {
+        console.log('Subscriptions:', subscriptions); // Add logging to check data
         this.userSubscriptions = subscriptions;
         this.filteredUserSubscriptions = [...subscriptions];
-        console.log(subscriptions);
       },
-      error: () => (this.error = 'Failed to load user subscriptions'),
+      error: (err) => {
+        console.error('Error loading subscriptions:', err);
+        this.error = 'Failed to load user subscriptions';
+      },
     });
   }
 
@@ -91,10 +95,20 @@ export class UserSubscriptionsComponent implements OnInit {
 
     const query = this.searchQuery.toLowerCase();
     this.filteredUserSubscriptions = this.userSubscriptions.filter(
-      (subscription) =>
-        subscription.user?.toLowerCase().includes(query) || // Search by user
-        subscription.subscription?._id?.toLowerCase().includes(query) || // Search by subscription ID
-        subscription.status.toLowerCase().includes(query) // Search by status
+      (subscription) => {
+        // Log the subscription to see its structure
+        console.log('Subscription:', subscription);
+
+        const userName = `${subscription.userId?.firstName?.en || ''} ${subscription.userId?.lastName?.en || ''}`.toLowerCase();
+        const subscriptionName = subscription.subscriptionId?.name?.toLowerCase() || '';
+        
+        // Handle status based on the actual structure
+        const status = String(subscription.status || '').toLowerCase();
+
+        return userName.includes(query) ||
+               subscriptionName.includes(query) ||
+               status.includes(query);
+      }
     );
   }
 
@@ -148,25 +162,42 @@ export class UserSubscriptionsComponent implements OnInit {
     }
   }
 
-  toggleSubscriptionStatus(subscription: UserSubscriptions) {
-    if (!subscription._id || !subscription.status) {
-      console.error('Subscription ID and status are required for toggling');
-      this.error = 'Subscription ID and status are required';
+  // Add these methods to the UserSubscriptionsComponent class:
+
+  cancelSubscription(subscriptionId: string) {
+    if (!subscriptionId) {
+      console.error('Subscription ID is required for cancellation');
+      this.error = 'Subscription ID is required';
       return;
     }
 
-    const newStatus = subscription.status === 'active' ? 'canceled' : 'active';
+    this.userSubscriptionsService.cancelSubscription(subscriptionId).subscribe({
+      next: () => {
+        this.loadUserSubscriptions(); // Reload the list after cancellation
+      },
+      error: (error) => {
+        console.error('Error canceling subscription:', error);
+        this.error = 'Failed to cancel subscription';
+      },
+    });
+  }
+
+  reactivateSubscription(subscriptionId: string) {
+    if (!subscriptionId) {
+      console.error('Subscription ID is required for reactivation');
+      this.error = 'Subscription ID is required';
+      return;
+    }
 
     this.userSubscriptionsService
-      .toggleSubscriptionStatus(subscription._id, newStatus)
+      .reactivateSubscription(subscriptionId)
       .subscribe({
         next: () => {
-          subscription.status = newStatus;
+          this.loadUserSubscriptions(); // Reload the list after reactivation
         },
         error: (error) => {
-          console.error('Error toggling subscription status:', error);
-          this.error =
-            'Failed to toggle subscription status. Please try again later.';
+          console.error('Error reactivating subscription:', error);
+          this.error = 'Failed to reactivate subscription';
         },
       });
   }
