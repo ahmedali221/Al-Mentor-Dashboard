@@ -18,7 +18,13 @@ export class LessonsService {
     console.log('Fetching lessons from:', `${this.apiUrl}/lessons`);
     return this.http.get<Lesson[]>(`${this.apiUrl}/lessons`)
       .pipe(
-        tap(lessons => console.log(`Fetched ${lessons.length} lessons`)),
+        tap(lessons => {
+          // console.log(`Fetched ${lessons.length} lessons`);
+          // console.log('Lessons from API:', lessons);
+          lessons.forEach(lesson => {
+            // console.log('Lesson:', lesson.title?.en, 'course:', lesson.course);
+          });
+        }),
         catchError(this.handleError('getLessons'))
       );
   }
@@ -55,6 +61,10 @@ export class LessonsService {
       .pipe(
         catchError(this.handleError('deleteLesson'))
       );
+  }
+
+  getLessonsByCourse(courseId: string): Observable<Lesson[]> {
+    return this.http.get<Lesson[]>(`${this.apiUrl}/lessons/course/${courseId}`);
   }
 
   // Generic error handler with contextual information
