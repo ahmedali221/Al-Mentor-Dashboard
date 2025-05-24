@@ -75,7 +75,9 @@
         <!-- Category -->
         <ng-container matColumnDef="category">
           <th mat-header-cell *matHeaderCellDef>Category</th>
-          <td mat-cell *matCellDef="let subTopic">{{ subTopic.category }}</td>
+          <td mat-cell *matCellDef="let subTopic">
+            {{ getCategoryName(subTopic.category) }}
+          </td>
         </ng-container>
         <!-- Order -->
         <ng-container matColumnDef="order">
@@ -165,11 +167,20 @@
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Category</mat-label>
-                <input matInput formControlName="category" />
-            </mat-form-field>
+                <mat-select formControlName="category" required>
+                  <mat-option *ngFor="let category of categories" [value]="category._id">
+                    {{ category.name.en }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
               <mat-form-field appearance="outline">
                 <mat-label>Topic</mat-label>
-                <input matInput formControlName="topic" />
+                <mat-select formControlName="topic" required>
+                  <mat-option *ngFor="let topic of topics" [value]="topic._id">
+                    {{ topic.name.en }}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
@@ -248,12 +259,23 @@
 
           
             <div>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Topic</mat-label>
-                    <input matInput formControlName="topic" />
-                  </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Category</mat-label>
+                <mat-select formControlName="category" required>
+                  <mat-option *ngFor="let category of categories" [value]="category._id">
+                    {{ category.name.en }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
 
-                 
+              <mat-form-field appearance="outline">
+                <mat-label>Topic</mat-label>
+                <mat-select formControlName="topic" required>
+                  <mat-option *ngFor="let topic of topics" [value]="topic._id">
+                    {{ topic.name.en }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Order</mat-label>

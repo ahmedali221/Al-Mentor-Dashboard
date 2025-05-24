@@ -68,64 +68,62 @@
       </div>
 
       <ng-template #loadedContent>
-        <table mat-table [dataSource]="filteredLessons">
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>ID</th>
-            <td mat-cell *matCellDef="let lesson">{{ lesson._id }}</td>
-          </ng-container>
+        <div *ngIf="filteredLessons.length > 0; else noLessons">
+          <table mat-table [dataSource]="filteredLessons" class="mat-elevation-z1 full-width">
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef>Title</th>
+              <td mat-cell *matCellDef="let lesson">{{ lesson.title?.en }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let lesson">{{ lesson.title?.en }}</td>
-          </ng-container>
+            <ng-container matColumnDef="courseName">
+              <th mat-header-cell *matHeaderCellDef>Course</th>
+              <td mat-cell *matCellDef="let lesson">{{ lesson.courseName }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="courseName">
-            <th mat-header-cell *matHeaderCellDef>Course</th>
-            <td mat-cell *matCellDef="let lesson">{{ lesson.courseName }}</td>
-          </ng-container>
+            <ng-container matColumnDef="duration">
+              <th mat-header-cell *matHeaderCellDef>Duration</th>
+              <td mat-cell *matCellDef="let lesson">{{ lesson.duration }} minutes</td>
+            </ng-container>
 
-          <ng-container matColumnDef="duration">
-            <th mat-header-cell *matHeaderCellDef>Duration</th>
-            <td mat-cell *matCellDef="let lesson">{{ lesson.duration }}</td>
-          </ng-container>
+            <ng-container matColumnDef="availableLanguages">
+              <th mat-header-cell *matHeaderCellDef>Languages</th>
+              <td mat-cell *matCellDef="let lesson">
+                {{ lesson.availableLanguages?.join(', ') }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let lesson">
-              <span
-                [class]="
-                  'status-badge ' +
-                  (lesson.status === 'Active' ? 'active' : 'inactive')
-                "
-              >
-                {{ lesson.status }}
-              </span>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let lesson">
+                <span [class]="'status-badge ' + (lesson.status === 'Active' ? 'active' : 'inactive')">
+                  {{ lesson.status}}
+                </span>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let lesson">
-              <button
-                mat-icon-button
-                color="primary"
-                (click)="openUpdateForm(lesson)"
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="deleteLesson(lesson._id)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let lesson">
+                <button mat-icon-button color="primary" (click)="openUpdateForm(lesson)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteLesson(lesson._id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+
+        <!-- No Lessons Message -->
+        <ng-template #noLessons>
+          <div class="no-lessons">
+            <p>No lessons found. Try changing filters or add a new one.</p>
+          </div>
+        </ng-template>
       </ng-template>
     </mat-card-content>
   </mat-card>
@@ -155,15 +153,14 @@
           </mat-form-field>
         </div>
 
-<mat-form-field appearance="outline" class="full-width">
-  <mat-label>Course</mat-label>
-  <mat-select formControlName="courseId" required>
-    <mat-option *ngFor="let course of courses" [value]="course._id">
-      {{ course.title.en }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
-
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Course</mat-label>
+          <mat-select formControlName="courseId" required>
+            <mat-option *ngFor="let course of courses" [value]="course._id">
+              {{ course.title.en }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Duration (minutes)</mat-label>

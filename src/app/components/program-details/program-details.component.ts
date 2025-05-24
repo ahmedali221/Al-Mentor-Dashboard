@@ -3,11 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { ProgramsService } from '../../services/programs.service';
 import { CoursesService } from '../../services/course.service';
 import { program } from '../../interfaces/program.interface';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Location } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,11 +19,26 @@ import { Course } from '../../interfaces/course';
 @Component({
   selector: 'app-program-details',
   standalone: true,
-  imports: [CommonModule, MatInputModule, MatList, MatListItem, MatSelectModule, FormsModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatFormFieldModule],
+  imports: [
+    CommonModule,
+    MatInputModule,
+    MatList,
+    MatListItem,
+    MatSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatFormFieldModule
+  ],
   templateUrl: './program-details.component.html',
-  styleUrl: './program-details.component.scss'
+  styleUrls: ['./program-details.component.scss']
 })
 export class ProgramDetailsComponent implements OnInit {
+  @ViewChild('updateDetailsDialog') updateDetailsDialog!: TemplateRef<any>;
+
   program!: program;
   loading = true;
   updateForm!: FormGroup;
@@ -39,9 +53,12 @@ export class ProgramDetailsComponent implements OnInit {
     private coursesService: CoursesService,
     private location: Location,
     private fb: FormBuilder,
-
-    private dialog: MatDialog // Add this
+    private dialog: MatDialog
   ) {
+    this.createForm();
+  }
+
+  createForm() {
     this.updateForm = this.fb.group({
       title: ['', Validators.required],
       slug: ['', Validators.required],
@@ -49,32 +66,7 @@ export class ProgramDetailsComponent implements OnInit {
       thumbnail: ['', Validators.required],
       level: ['', Validators.required],
       language: ['', Validators.required],
-      category: ['', Validators.required],
-      totalDuration: ['', Validators.required]
-    });
-  }
-
-  goBack(): void {
-    this.location.back();
-  }
-
-  @ViewChild('updateDetailsDialog') updateDetailsDialog!: TemplateRef<any>;
-
-  openUpdateDetailsForm(program: program): void {
-    this.selectedProgram = program;
-    this.updateForm.patchValue({
-      title: program.title,
-      slug: program.slug,
-      description: program.description,
-      thumbnail: program.thumbnail,
-      level: program.level,
-      language: program.language,
-      category: program.category,
-      totalDuration: program.totalDuration
-    });
-
-    this.dialog.open(this.updateDetailsDialog, {
-      width: '800px'
+      category: ['', Validators.required],      totalDuration: ['', Validators.required]
     });
   }
 
@@ -112,6 +104,36 @@ export class ProgramDetailsComponent implements OnInit {
     });
   }
 
+  openUpdateDetailsForm(program: program): void {
+    this.selectedProgram = program;
+    this.updateForm.patchValue({
+      title: program.title,
+      slug: program.slug,
+      description: program.description,
+      thumbnail: program.thumbnail,
+      level: program.level,
+      language: program.language,
+      category: program.category,
+      totalDuration: program.totalDuration
+    });
+
+    this.dialog.open(this.updateDetailsDialog, {
+      width: '800px'
+    });
+  }
+
+  updateProgram(): void {
+    if (this.updateForm.valid) {
+      const updatedProgram = { ...this.selectedProgram, ...this.updateForm.value };
+      this.programsService.updateProgram(updatedProgram).subscribe({
+        next: () => {
+          this.program = updatedProgram;
+          this.dialog.closeAll();
+        }
+      });
+    }
+  }
+
   updateUnassociatedCourses() {
     if (this.program && this.allCourses) {
       this.unassociatedCourses = this.allCourses.filter(course =>
@@ -146,20 +168,7 @@ export class ProgramDetailsComponent implements OnInit {
     }
   }
 
-  updateProgram(): void {
-    if (this.updateForm.valid) {
-      const updatedProgram = { ...this.selectedProgram, ...this.updateForm.value };
-      this.programsService.updateProgram(updatedProgram).subscribe({
-        next: () => {
-          this.program = updatedProgram;
-          this.dialog.closeAll();
-        }
-      });
-    }
-  }
-
   deleteProgram(): void {
-
     if (this.program) {
       if (confirm('Are you sure you want to delete this program?')) {
         this.programsService.deleteProgram(this.program._id).subscribe({
@@ -168,11 +177,11 @@ export class ProgramDetailsComponent implements OnInit {
           }
         });
         alert('Program deleted successfully');
-        this.location.back();
-      } else {
-        alert('Deletion canceled');
       }
-
     }
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

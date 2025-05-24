@@ -15,9 +15,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
-
+import { MatSelectModule } from '@angular/material/select';
+import { User } from '../../interfaces/user.interface';
+import { Subscription } from '../../interfaces/subscriptions';
+import { UsersService } from '../../services/users.service';
+import { SubscriptionsService } from '../../services/subscriptions.service';
 @Component({
   selector: 'app-user-subscriptions',
   standalone: true,
@@ -41,7 +44,7 @@ import { CommonModule } from '@angular/common';
 export class UserSubscriptionsComponent implements OnInit {
   displayedColumns: string[] = [
     'userId',
-    'subscriptionId', // Now shows subscription.name
+    'subscriptionId',
     'startDate',
     'endDate',
     'status',
@@ -51,7 +54,8 @@ export class UserSubscriptionsComponent implements OnInit {
   filteredUserSubscriptions: UserSubscriptions[] = [];
   error = '';
   searchQuery: string = '';
-
+  userList: User[] = [];
+  subscriptionList: Subscription[] = [];
   addUserSubscriptionForm: FormGroup;
 
   @ViewChild('addUserSubscriptionDialog')
@@ -60,9 +64,10 @@ export class UserSubscriptionsComponent implements OnInit {
   constructor(
     private userSubscriptionsService: UserSubscriptionsService,
     private fb: FormBuilder,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+     private usersService: UsersService,
+    private subscriptionsService: SubscriptionsService
   ) {
-    // Initialize Add User Subscription Form
     this.addUserSubscriptionForm = this.fb.group({
       userId: ['', Validators.required],
       subscriptionId: ['', Validators.required],
@@ -71,12 +76,14 @@ export class UserSubscriptionsComponent implements OnInit {
 
   ngOnInit() {
     this.loadUserSubscriptions();
+    this.loadUsers();
+    this.loadSubscriptions();
   }
 
   loadUserSubscriptions() {
     this.userSubscriptionsService.getAll().subscribe({
       next: (subscriptions) => {
-        console.log('Subscriptions:', subscriptions); // Add logging to check data
+        console.log('Subscriptions:', subscriptions);
         this.userSubscriptions = subscriptions;
         this.filteredUserSubscriptions = [...subscriptions];
       },
@@ -84,6 +91,27 @@ export class UserSubscriptionsComponent implements OnInit {
         console.error('Error loading subscriptions:', err);
         this.error = 'Failed to load user subscriptions';
       },
+    });
+  }
+  loadUsers() {
+    this.usersService.getUsers().subscribe({
+      next: (users) => {
+        this.userList = users || [];
+      },
+      error: () => {
+        this.userList = [];
+      }
+    });
+  }
+
+  loadSubscriptions() {
+    this.subscriptionsService.getAll().subscribe({
+      next: (subs) => {
+        this.subscriptionList = subs || [];
+      },
+      error: () => {
+        this.subscriptionList = [];
+      }
     });
   }
 
@@ -96,18 +124,12 @@ export class UserSubscriptionsComponent implements OnInit {
     const query = this.searchQuery.toLowerCase();
     this.filteredUserSubscriptions = this.userSubscriptions.filter(
       (subscription) => {
-        // Log the subscription to see its structure
         console.log('Subscription:', subscription);
-
-        const userName = `${subscription.userId?.firstName?.en || ''} ${subscription.userId?.lastName?.en || ''}`.toLowerCase();
+        const userName = `${subscription.userId?.firstName || ''} ${subscription.userId?.lastName || ''}`.toLowerCase();
         const subscriptionName = subscription.subscriptionId?.name?.toLowerCase() || '';
-        
-        // Handle status based on the actual structure
         const status = String(subscription.status || '').toLowerCase();
 
-        return userName.includes(query) ||
-               subscriptionName.includes(query) ||
-               status.includes(query);
+        return userName.includes(query) || subscriptionName.includes(query) || status.includes(query);
       }
     );
   }
@@ -146,23 +168,18 @@ export class UserSubscriptionsComponent implements OnInit {
   addUserSubscription() {
     if (this.addUserSubscriptionForm.valid) {
       const formValue = this.addUserSubscriptionForm.value;
-      this.userSubscriptionsService
-        .createUserSubscription(formValue)
-        .subscribe({
-          next: () => {
-            this.loadUserSubscriptions();
-            this.dialog.closeAll();
-          },
-          error: (error) => {
-            console.error('Error adding user subscription:', error);
-            this.error =
-              'Failed to add user subscription. Please try again later.';
-          },
-        });
+      this.userSubscriptionsService.createUserSubscription(formValue).subscribe({
+        next: () => {
+          this.loadUserSubscriptions();
+          this.dialog.closeAll();
+        },
+        error: (error) => {
+          console.error('Error adding user subscription:', error);
+          this.error = 'Failed to add user subscription. Please try again later.';
+        },
+      });
     }
   }
-
-  // Add these methods to the UserSubscriptionsComponent class:
 
   cancelSubscription(subscriptionId: string) {
     if (!subscriptionId) {
@@ -201,6 +218,7 @@ export class UserSubscriptionsComponent implements OnInit {
         },
       });
   }
+
 
   get totalUserSubscriptions(): number {
     return this.userSubscriptions.length;

@@ -26,7 +26,6 @@ export class TopicsService {
   updateTopic(id: string, topicData: Partial<Topic>): Observable<Topic> {
     return this.http.put<Topic>(`${this.apiUrl}/${id}`, topicData);
   }
-
   deleteTopic(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }

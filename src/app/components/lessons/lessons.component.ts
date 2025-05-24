@@ -1,3 +1,4 @@
+import { Course } from './../../interfaces/course';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,12 +15,13 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { LessonsService } from '../../services/lessons.service';
-import { Course } from '../../interfaces/course';
 import { Lesson } from '../../interfaces/lesson';
+import { debounceTime } from 'rxjs/operators';
 
-// Validator for ObjectID format
 function objectIdValidator(control: FormControl) {
-  if (!control.value) return null;
+  if (!control.value) {
+    return null;
+  }
   const valid = /^[0-9a-fA-F]{24}$/.test(control.value);
   return valid ? null : { invalidObjectId: { value: control.value } };
 }
@@ -51,13 +53,15 @@ export class CLessonsComponent implements OnInit {
   lessons: Lesson[] = [];
   filteredLessons: Lesson[] = [];
   courses: Course[] = [];
-  displayedColumns: string[] = ['title', 'courseName', 'duration', 'status', 'actions'];
+  displayedColumns: string[] = ['title', 'courseName', 'duration', 'availableLanguages', 'status', 'actions'];
 
   searchControl = new FormControl('');
   selectedCourse = new FormControl('');
+  selectedCourseId: string = '';
   addForm!: FormGroup;
   updateForm!: FormGroup;
   selectedLesson: Lesson | null = null;
+  lesson: any;
   isLoading: boolean = false;
 
   constructor(
@@ -67,14 +71,6 @@ export class CLessonsComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.initForms();
-  }
-
-  ngOnInit(): void {
-    this.loadCourses();
-    this.loadLessons();
-
-    this.searchControl.valueChanges.subscribe(() => this.filterLesson());
-    this.selectedCourse.valueChanges.subscribe(() => this.filterLesson());
   }
 
   initForms() {
@@ -104,33 +100,60 @@ export class CLessonsComponent implements OnInit {
     this.updateForm = this.fb.group(commonFormStructure);
   }
 
-  loadLessons() {
-  this.isLoading = true;
-  this.lessonsService.getLessons().subscribe({
-    next: (data: Lesson[]) => {
-      this.lessons = data.map(lesson => ({
-        ...lesson,
-        courseId: lesson.course?._id || '',
-        courseName: lesson.course?.title?.en || 'Unknown'
-      }));
-      this.filteredLessons = [...this.lessons];
-      this.isLoading = false;
-    },
-    error: (error) => {
-      this.isLoading = false;
-      this.snackBar.open(`Failed to load lessons: ${error.message}`, 'Close', { duration: 5000 });
-    }
-  });
-}
-
-
-  loadCourses(): void {
+  ngOnInit(): void {
     this.lessonsService.getCourses().subscribe({
       next: (courses) => {
         this.courses = courses;
+        this.loadLessons();
       },
       error: (error) => {
+        console.error('Error loading courses:', error);
         this.snackBar.open(`Failed to load courses: ${error.message}`, 'Close', { duration: 5000 });
+      }
+    });
+
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe(() => this.filterLessons());
+
+    this.selectedCourse.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe(() => this.filterLessons());
+  }
+
+  loadCourses(): void {
+    this.isLoading = true;
+    this.lessonsService.getCourses().subscribe({
+      next: (courses) => {
+        this.courses = courses;
+        this.loadLessons();
+      },
+      error: (error) => {
+        console.error('Error loading courses:', error);
+        this.isLoading = false;
+        this.snackBar.open(`Failed to load courses: ${error.message}`, 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  loadLessons() {
+    this.isLoading = true;
+    this.lessonsService.getLessons().subscribe({
+      next: (data: Lesson[]) => {
+        this.lessons = data.map(lesson => {
+          const course = this.courses.find(c => c._id === lesson.course?._id);
+          return {
+            ...lesson,
+            courseName: course?.title?.en || 'Unknown Course'
+          };
+        });
+        this.filteredLessons = [...this.lessons];
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading lessons:', error);
+        this.isLoading = false;
+        this.snackBar.open(`Failed to load lessons: ${error.message}`, 'Close', { duration: 5000 });
       }
     });
   }
@@ -141,29 +164,6 @@ export class CLessonsComponent implements OnInit {
 
   get activeLessons(): number {
     return this.lessons.filter(lesson => lesson.status === 'Active').length;
-  }
-
-filterLesson() {
-  const search = this.searchControl.value?.toLowerCase() || '';
-  const selectedCourseId = this.selectedCourse.value || '';
-
-  this.filteredLessons = this.lessons.filter(lesson => {
-    const matchesSearch =
-      lesson.title?.en?.toLowerCase().includes(search) ||
-      lesson.description?.en?.toLowerCase().includes(search);
-
-    const matchesCourse =
-      !selectedCourseId || lesson.courseId === selectedCourseId;
-
-    return matchesSearch && matchesCourse;
-  });
-}
-
-
-
-  clearFilters() {
-    this.searchControl.setValue('');
-    this.selectedCourse.setValue('');
   }
 
   openAddForm() {
@@ -197,7 +197,7 @@ filterLesson() {
         en: lesson.description?.en || '',
         ar: lesson.description?.ar || ''
       },
-      courseId: lesson.courseId || lesson.course?._id || '',
+      courseId: lesson.courseId || '',
       order: lesson.order || 0,
       duration: lesson.duration || 0,
       module: lesson.module || '',
@@ -205,93 +205,128 @@ filterLesson() {
       status: lesson.status || 'Active'
     });
 
-    this.dialog.open(this.updateDialog, { width: '800px' });
+    this.dialog.open(this.updateDialog, { width: '800px', data: { lesson: lesson } });
   }
 
-addNewLesson() {
-  if (this.addForm.valid) {
-    const formValue = this.addForm.value;
+  addNewLesson() {
+    if (this.addForm.valid) {
+      const formValue = this.addForm.value;
+      const newLesson = {
+        title: {
+          en: formValue.title?.en?.trim() || '',
+          ar: formValue.title?.ar?.trim() || ''
+        },
+        description: {
+          en: formValue.description?.en?.trim() || '',
+          ar: formValue.description?.ar?.trim() || ''
+        },
+        courseId: formValue.courseId || '',
+        ...(formValue.module && formValue.module.trim() !== '' ? { module: formValue.module } : {}),
+        order: Number(formValue.order) || 0,
+        duration: Number(formValue.duration) || 0,
+        availableLanguages: formValue.availableLanguages || ['en'],
+        status: 'Active'
+      };
 
-    const newLesson = {
-      title: {
-        en: formValue.title.en.trim(),
-        ar: formValue.title.ar?.trim() || ''
-      },
-      description: {
-        en: formValue.description.en.trim(),
-        ar: formValue.description.ar?.trim() || ''
-      },
-      course: formValue.courseId, // <-- هنا التغيير
-      module: formValue.module || '',
-      order: Number(formValue.order),
-      duration: Number(formValue.duration),
-      availableLanguages: formValue.availableLanguages || ['en'],
-      status: formValue.status || 'Active',
-      isFree: true,
-      isPublished: true
-    };
+      this.isLoading = true;
+      this.lessonsService.addLesson(newLesson).subscribe({
+        next: (response) => {
+          this.loadLessons();
+          this.dialog.closeAll();
+          this.isLoading = false;
+          this.snackBar.open('Lesson added successfully', 'Close', { duration: 3000 });
+        },
+        error: (error) => {
+          console.error('Error adding lesson:', error);
+          this.isLoading = false;
+          this.snackBar.open(`Failed to add lesson: ${error.message}`, 'Close', { duration: 5000 });
+        }
+      });
+    } else {
+      this.addForm.markAllAsTouched();
+      const invalidControls = this.getFormValidationErrors(this.addForm);
+      this.snackBar.open('Please fill in all required fields: ' + invalidControls.join(', '), 'Close', { duration: 5000 });
+    }
+  }
 
-    this.isLoading = true;
+  updateLesson() {
+    if (this.updateForm.valid && this.selectedLesson?._id) {
+      const formValue = this.updateForm.value;
+      const updateData = {
+        title: {
+          en: formValue.title?.en?.trim() || '',
+          ar: formValue.title?.ar?.trim() || ''
+        },
+        description: {
+          en: formValue.description?.en?.trim() || '',
+          ar: formValue.description?.ar?.trim() || ''
+        },
+        courseId: formValue.courseId || '',
+        order: Number(formValue.order) || 0,
+        duration: Number(formValue.duration) || 0,
+        module: formValue.module || '',
+        availableLanguages: formValue.availableLanguages || ['en'],
+        status: formValue.status || 'Active'
+      };
 
-    this.lessonsService.addLesson(newLesson).subscribe({
-      next: (lesson: Lesson) => {
-        this.loadLessons();
-        this.dialog.closeAll();
-        this.isLoading = false;
-        this.snackBar.open('Lesson added successfully', 'Close', { duration: 3000 });
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.snackBar.open(`Failed to add lesson: ${error.message}`, 'Close', { duration: 5000 });
+      this.isLoading = true;
+      this.lessonsService.updateLesson(this.selectedLesson._id, updateData)
+        .subscribe({
+          next: (response) => {
+            this.loadLessons();
+            this.dialog.closeAll();
+            this.isLoading = false;
+            this.snackBar.open('Lesson updated successfully', 'Close', { duration: 3000 });
+          },
+          error: (error) => {
+            console.error('Error updating lesson:', error);
+            this.isLoading = false;
+            this.snackBar.open(`Failed to update lesson: ${error.message || 'Unknown error'}`, 'Close', { duration: 5000 });
+          }
+        });
+    } else {
+      this.updateForm.markAllAsTouched();
+      const invalidControls = this.getFormValidationErrors(this.updateForm);
+      
+      if (!this.selectedLesson?._id) {
+        this.snackBar.open('Cannot update: Missing lesson ID', 'Close', { duration: 5000 });
+      } else {
+        this.snackBar.open('Please fill in all required fields: ' + invalidControls.join(', '), 'Close', { duration: 5000 });
       }
-    });
+    }
   }
-}
 
+  filterLessons() {
+    const search = this.searchControl.value?.toLowerCase() || '';
+    const courseId = this.selectedCourse.value || '';
 
-
- updateLesson() {
-  if (this.updateForm.valid && this.selectedLesson?._id) {
-    const formValue = this.updateForm.value;
-
-    const updateData = {
-      title: {
-        en: formValue.title?.en?.trim() || '',
-        ar: formValue.title?.ar?.trim() || ''
-      },
-      description: {
-        en: formValue.description?.en?.trim() || '',
-        ar: formValue.description?.ar?.trim() || ''
-      },
-      course: formValue.courseId || '', // <-- هنا التغيير
-      order: Number(formValue.order) || 0,
-      duration: Number(formValue.duration) || 0,
-      module: formValue.module || '',
-      availableLanguages: formValue.availableLanguages || ['en'],
-      status: formValue.status || 'Active'
-    };
-
-    this.isLoading = true;
-
-    this.lessonsService.updateLesson(this.selectedLesson._id, updateData).subscribe({
-      next: () => {
-        this.loadLessons();
-        this.dialog.closeAll();
-        this.isLoading = false;
-        this.snackBar.open('Lesson updated successfully', 'Close', { duration: 3000 });
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.snackBar.open(`Failed to update lesson: ${error.message}`, 'Close', { duration: 5000 });
-      }
-    });
-  } else {
-    this.updateForm.markAllAsTouched();
-    const invalidControls = this.getFormValidationErrors(this.updateForm);
-    this.snackBar.open('Please fill in all required fields: ' + invalidControls.join(', '), 'Close', { duration: 5000 });
+    this.filteredLessons = this.lessons
+      .filter(lesson => this.matchesSearch(lesson, search))
+      .filter(lesson => this.matchesCourse(lesson, courseId));
   }
-}
 
+  private matchesCourse(lesson: Lesson, courseId: string): boolean {
+    if (!courseId) return true;
+    return lesson.courseId === courseId || lesson.course?._id === courseId;
+  }
+  
+  private matchesSearch(lesson: Lesson, search: string): boolean {
+    if (!search) return true;
+    return (
+      lesson.title?.en?.toLowerCase().includes(search) ||
+      lesson.title?.ar?.toLowerCase()?.includes(search) ||
+      lesson.description?.en?.toLowerCase()?.includes(search) ||
+      lesson.description?.ar?.toLowerCase()?.includes(search) ||
+      lesson._id?.toLowerCase()?.includes(search)
+    );
+  }
+
+  clearFilters() {
+    this.searchControl.setValue('');
+    this.selectedCourse.setValue('');
+    this.filteredLessons = [...this.lessons];
+  }
+  
   deleteLesson(id: string) {
     if (confirm('Are you sure you want to delete this lesson?')) {
       this.isLoading = true;
@@ -302,8 +337,9 @@ addNewLesson() {
           this.snackBar.open('Lesson deleted successfully', 'Close', { duration: 3000 });
         },
         error: (error) => {
+          console.error('Error deleting lesson:', error);
           this.isLoading = false;
-          this.snackBar.open(`Failed to delete lesson: ${error.message}`, 'Close', { duration: 5000 });
+          this.snackBar.open(`Failed to delete lesson: ${error.message || 'Unknown error'}`, 'Close', { duration: 5000 });
         }
       });
     }
@@ -316,13 +352,22 @@ addNewLesson() {
   getFormValidationErrors(form: FormGroup): string[] {
     const result: string[] = [];
     Object.keys(form.controls).forEach(key => {
+      const controlErrors = form.get(key)?.errors;
+      if (controlErrors) {
+        Object.keys(controlErrors).forEach(keyError => {
+          result.push(`${key}: ${keyError}`);
+        });
+      }
       const control = form.get(key);
       if (control instanceof FormGroup) {
         result.push(...this.getFormValidationErrors(control));
-      } else if (control && control.invalid) {
-        result.push(key);
       }
     });
     return result;
+  }
+
+  getCourseName(courseId: string): string {
+    const course = this.courses.find(c => c._id === courseId);
+    return course?.title?.en || 'Unknown Course';
   }
 }
