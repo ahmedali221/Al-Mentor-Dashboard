@@ -15,7 +15,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { TopicsService } from '../../services/topics.service';
 import { Topic } from '../../interfaces/topic.interface';
 import { MatSelectModule } from '@angular/material/select';
-
+import { CategoryService } from '../../services/category.service';
+import { Category } from '../../interfaces/category.interface';
 
 @Component({
   selector: 'app-sub-topics',
@@ -45,6 +46,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
   selectedSubTopic: Subtopics | null = null;
   searchTerm: string = '';
   topics: Topic[] = [];
+  categories: Category[] = [];
   selectedTopicId: string = '';
 
   @ViewChild('addDialog') addDialog!: TemplateRef<any>;
@@ -53,6 +55,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
   constructor(
     private subtopicsService: SubtopicsService,
     private topicsService: TopicsService,
+    private categoryService: CategoryService,
     private fb: FormBuilder,
     private dialog: MatDialog
   ) {
@@ -80,6 +83,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       }),
       slug: ['', Validators.required],
       topic: ['', Validators.required],
+      category: [''],
       description: this.fb.group({
         en: [''],
         ar: ['']
@@ -92,22 +96,42 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.loadTopics();
+    this.loadCategories();
     this.loadSubTopics();
   }
 
   ngAfterViewInit() {
-    this.dataSource.filterPredicate = (data: Subtopics, filter: string) =>
-      (data.name?.en?.toLowerCase().includes(filter) || data.slug?.toLowerCase().includes(filter));
+    this.setupFilterPredicate();
+  }
+
+  setupFilterPredicate() {
+    this.dataSource.filterPredicate = (data: Subtopics, filter: string) => {
+      const search = this.searchTerm.trim().toLowerCase();
+      const topicFilter = this.selectedTopicId;
+
+      const matchesSearch =
+        data.name?.en?.toLowerCase().includes(search) ||
+        data.slug?.toLowerCase().includes(search);
+
+      const matchesTopic = !topicFilter || data.topic === topicFilter;
+
+      return matchesSearch && matchesTopic;
+    };
   }
 
   applyFilter() {
-    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    this.dataSource.filter = `${Math.random()}`; 
+  }
+
+  applyTopicFilter() {
+    this.applyFilter(); 
   }
 
   loadSubTopics() {
     this.subtopicsService.getAllSubTopics().subscribe({
       next: (data) => {
         this.dataSource.data = data;
+        this.applyFilter(); // ensure filtering applies after loading
       },
       error: (err) => {
         console.error('Error loading subtopics:', err);
@@ -117,18 +141,6 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  applyTopicFilter() {
-    if (!this.selectedTopicId) {
-      this.dataSource.filter = '';
-    } else {
-      this.dataSource.filterPredicate = (data: Subtopics, filter: string) =>
-        data.topic === filter;
-      this.dataSource.filter = this.selectedTopicId;
-    }
-  }
-
-
-
 
   loadTopics() {
     this.topicsService.getTopics().subscribe({
@@ -141,24 +153,18 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  filterSubTopicsByTopic() {
-    if (this.selectedTopicId) {
-      this.subtopicsService.getSubTopicsByTopic(this.selectedTopicId).subscribe({
-        next: (data) => {
-          this.dataSource.data = data;
-        },
-        error: (err) => {
-          console.error('Error filtering subtopics:', err);
-        }
-      });
-    } else {
-      this.loadSubTopics();
-    }
+  loadCategories() {
+    this.categoryService.getCategories().subscribe({
+      next: (data) => {
+        this.categories = data;
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      }
+    });
   }
 
   addSubTopic() {
-    console.log('Form value:', this.addForm.value);
-
     if (this.addForm.valid) {
       this.subtopicsService.createSubTopic(this.addForm.value).subscribe({
         next: () => {
@@ -194,6 +200,7 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
       name: { en: '', ar: '' },
       slug: '',
       topic: '',
+      category: '',
       description: { en: '', ar: '' },
       thumbnailImgUrl: '',
       order: 0,
@@ -225,5 +232,10 @@ export class SubTopicsComponent implements OnInit, AfterViewInit {
 
   closeDialog() {
     this.dialog.closeAll();
+  }
+
+  getCategoryName(categoryId: string): string {
+    const category = this.categories.find(c => c._id === categoryId);
+    return category ? category.name.en : categoryId;
   }
 }

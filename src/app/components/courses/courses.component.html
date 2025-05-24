@@ -47,12 +47,8 @@
       <mat-label>Filter by Topic</mat-label>
       <mat-select [formControl]="selectedTopic">
         <mat-option value="">All Topics</mat-option>
-        <mat-option
-          *ngFor="let topic of topics"
-          [value]="topic._id"
-          class="black-text-option"
-        >
-          {{ topic.title?.en }}
+        <mat-option *ngFor="let topic of topics" [value]="topic._id">
+          {{ topic.name.en }}
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -125,15 +121,18 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
   </div>
+
   <ng-template #noCourses>
     <div class="no-courses">
       <p>No courses found. Try changing filters or add a new one.</p>
     </div>
   </ng-template>
 
+  <!-- ADD COURSE DIALOG -->
   <ng-template #addDialog>
     <h2 mat-dialog-title>Add New Course</h2>
     <mat-dialog-content [formGroup]="addForm" class="course-form-grid">
+      <!-- Title Fields -->
       <div formGroupName="title">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Title (EN)</mat-label>
@@ -147,6 +146,7 @@
             English title is required
           </mat-error>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Title (AR)</mat-label>
           <input matInput formControlName="ar" required />
@@ -161,6 +161,7 @@
         </mat-form-field>
       </div>
 
+      <!-- Slug Fields -->
       <div formGroupName="slug">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Slug (EN)</mat-label>
@@ -173,6 +174,7 @@
             English slug is required
           </mat-error>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Slug (AR)</mat-label>
           <input matInput formControlName="ar" required />
@@ -186,6 +188,7 @@
         </mat-form-field>
       </div>
 
+      <!-- Description Fields -->
       <div formGroupName="description">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Description (EN)</mat-label>
@@ -199,6 +202,7 @@
             English description is required
           </mat-error>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Description (AR)</mat-label>
           <textarea matInput formControlName="ar" required rows="3"></textarea>
@@ -213,20 +217,28 @@
         </mat-form-field>
       </div>
 
+      <!-- Short Description Fields -->
       <div formGroupName="shortDescription">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Short Description (EN)</mat-label>
           <textarea matInput formControlName="en" rows="2"></textarea>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Short Description (AR)</mat-label>
           <textarea matInput formControlName="ar" rows="2"></textarea>
         </mat-form-field>
       </div>
 
+      <!-- Dropdown Fields -->
+
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Topic</mat-label>
-        <input matInput formControlName="topic" required />
+        <mat-select formControlName="topic" required>
+          <mat-option *ngFor="let topic of topics" [value]="topic._id">
+            {{ topic.name.en }}
+          </mat-option>
+        </mat-select>
         <mat-error
           *ngIf="addForm.get('topic')?.invalid && addForm.get('topic')?.touched"
         >
@@ -234,14 +246,25 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <!-- <mat-form-field appearance="outline" class="full-width">
         <mat-label>Subtopic (Optional)</mat-label>
-        <input matInput formControlName="subtopic" />
-      </mat-form-field>
-
+        <mat-select formControlName="subtopic">
+          <mat-option *ngFor="let subtopic of subtopics" [value]="subtopic.id">
+            {{ subtopic.name.en }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field> -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Instructor</mat-label>
-        <input matInput formControlName="instructor" required />
+        <mat-select formControlName="instructor" required>
+          <mat-option
+            *ngFor="let instructor of instructors"
+            [value]="instructor._id"
+          >
+            {{ instructor.profile.firstName?.en }}
+            {{ instructor.profile.lastName?.en }}
+          </mat-option>
+        </mat-select>
         <mat-error
           *ngIf="
             addForm.get('instructor')?.invalid &&
@@ -254,7 +277,14 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Category</mat-label>
-        <input matInput formControlName="category" required />
+        <mat-select formControlName="category" required>
+          <mat-option
+            *ngFor="let category of categories"
+            [value]="category._id"
+          >
+            {{ category.name.en }}
+          </mat-option>
+        </mat-select>
         <mat-error
           *ngIf="
             addForm.get('category')?.invalid && addForm.get('category')?.touched
@@ -264,6 +294,7 @@
         </mat-error>
       </mat-form-field>
 
+      <!-- Level Fields -->
       <div formGroupName="level">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Level (EN)</mat-label>
@@ -273,6 +304,7 @@
             <mat-option value="advanced">Advanced</mat-option>
           </mat-select>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Level (AR)</mat-label>
           <mat-select formControlName="ar" required>
@@ -283,20 +315,24 @@
         </mat-form-field>
       </div>
 
+      <!-- Duration Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Duration (minutes)</mat-label>
         <input matInput type="number" formControlName="duration" min="0" />
       </mat-form-field>
 
+      <!-- Free Course Checkbox -->
       <div class="checkbox-field">
         <mat-checkbox formControlName="isFree">Free Course</mat-checkbox>
       </div>
 
+      <!-- Thumbnail URL Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Thumbnail URL</mat-label>
         <input matInput formControlName="thumbnailImgUrl" />
       </mat-form-field>
 
+      <!-- Available Languages -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Available Languages</mat-label>
         <mat-select formControlName="availableLanguages" multiple>
@@ -323,6 +359,7 @@
   <ng-template #updateDialog>
     <h2 mat-dialog-title>Update Course</h2>
     <mat-dialog-content [formGroup]="updateForm" class="form-grid">
+      <!-- Update Title Fields -->
       <div formGroupName="title">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Title (EN)</mat-label>
@@ -334,11 +371,13 @@
         </mat-form-field>
       </div>
 
+      <!-- Update Slug Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Slug</mat-label>
         <input matInput formControlName="slug" required />
       </mat-form-field>
 
+      <!-- Update Description Fields -->
       <div formGroupName="description">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Description (EN)</mat-label>
@@ -350,21 +389,50 @@
         </mat-form-field>
       </div>
 
+      <!-- Update Topic Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Topic</mat-label>
-        <input matInput formControlName="topicId" required />
+        <mat-select formControlName="topic" required>
+          <mat-option *ngFor="let topic of topics" [value]="topic._id">
+            {{ topic.name.en }}
+          </mat-option>
+        </mat-select>
+        <mat-error
+          *ngIf="addForm.get('topic')?.invalid && addForm.get('topic')?.touched"
+        >
+          Topic is required
+        </mat-error>
       </mat-form-field>
 
+      <!-- Update Instructor Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Instructor</mat-label>
-        <input matInput formControlName="instructor" required />
+        <mat-select formControlName="instructor" required>
+          <mat-option
+            *ngFor="let instructor of instructors"
+            [value]="instructor._id"
+          >
+            {{ instructor.profile.firstName?.en }}
+            {{ instructor.profile.lastName?.en }}
+          </mat-option>
+        </mat-select>
+        <mat-error
+          *ngIf="
+            addForm.get('instructor')?.invalid &&
+            addForm.get('instructor')?.touched
+          "
+        >
+          Instructor is required
+        </mat-error>
       </mat-form-field>
 
+      <!-- Update Thumbnail URL Field -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Thumbnail URL</mat-label>
         <input matInput formControlName="thumbnailImgUrl" />
       </mat-form-field>
 
+      <!-- Update Available Languages -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Languages</mat-label>
         <mat-select formControlName="availableLanguages" multiple>

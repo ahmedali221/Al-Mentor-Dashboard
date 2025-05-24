@@ -1,5 +1,5 @@
 import { Component, ViewChild, TemplateRef, AfterViewInit, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,6 +13,8 @@ import { CommonModule } from '@angular/common';
 import { TopicsService } from '../../services/topics.service';
 import { Topic } from '../../interfaces/topic.interface';
 import { debounceTime } from 'rxjs/operators';
+import { Category } from '../../interfaces/category.interface';
+import { CategoryService } from '../../services/category.service';
 
 @Component({
   selector: 'app-topics',
@@ -41,12 +43,14 @@ export class TopicsComponent implements AfterViewInit, OnInit {
   selectedTopic: Topic | null = null;
   searchControl = new FormControl('');
   isLoading: boolean = false;
+  categories: Category[] = [];
 
   @ViewChild('addDialog') addDialog!: TemplateRef<any>;
   @ViewChild('updateDialog') updateDialog!: TemplateRef<any>;
 
   constructor(
     private topicsService: TopicsService,
+    private categoryService: CategoryService,
     private fb: FormBuilder,
     private dialog: MatDialog
   ) {
@@ -75,10 +79,7 @@ export class TopicsComponent implements AfterViewInit, OnInit {
         en: ['', Validators.required],
         ar: ['']
       }),
-      slug: this.fb.group({
-        en: ['', Validators.required],
-        ar: ['']
-      }),
+      slug: ['', Validators.required],
       description: this.fb.group({
         en: ['', Validators.required],
         ar: ['']
@@ -93,6 +94,18 @@ export class TopicsComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.loadTopics();
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -118,6 +131,7 @@ export class TopicsComponent implements AfterViewInit, OnInit {
 
   loadTopics() {
     this.isLoading = true;
+
 
     this.topicsService.getTopics().subscribe({
       next: (data) => {

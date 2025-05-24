@@ -188,10 +188,14 @@
               <mat-label>Course Count</mat-label>
               <input matInput type="number" formControlName="courseCount" />
             </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-  <mat-label>Category</mat-label>
-<input matInput formControlName="category" />
-</mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category" required>
+                <mat-option *ngFor="let category of categories" [value]="category._id">
+                  {{ category.name.en }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
 
            
@@ -285,6 +289,14 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Course Count</mat-label>
               <input matInput type="number" formControlName="courseCount" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category" required>
+                <mat-option *ngFor="let category of categories" [value]="category._id">
+                  {{ category.name.en }}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
           </div>
         </div>
