@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { CoursesService } from '../../services/course.service';
 import { TopicsService } from '../../services/topics.service';
@@ -18,6 +18,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-courses',
@@ -28,7 +29,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     CommonModule,
     MatTableModule,
     MatFormFieldModule,
-    ReactiveFormsModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
@@ -36,6 +36,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatIconModule,
     MatDialogModule,
     MatCheckboxModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
 })
 export class CoursesComponent implements OnInit {
@@ -48,11 +50,20 @@ export class CoursesComponent implements OnInit {
   categories: any[] = [];
   instructors: any[] = [];
   subtopics: any[] = [];
-  displayedColumns: string[] = ['title', 'instructorName', 'slug', 'availableLanguages', 'lessonsCount', 'actions'];
+
+  displayedColumns: string[] = [
+    'title',
+    'instructorName',
+    'slug',
+    'language',
+    'duration',
+    'actions',
+  ];
+
   searchControl = new FormControl('');
   selectedTopic = new FormControl('');
-  course: any;
-  selectedCourse: any;
+  selectedCourse?: Course;
+
   addForm!: FormGroup;
   updateForm!: FormGroup;
 
@@ -80,8 +91,21 @@ export class CoursesComponent implements OnInit {
     });
 
     this.selectedTopic.valueChanges.subscribe(() => {
-      this.filterCoursesTopic();
+      this.filterCoursesByTopic();
     });
+  }
+
+  // Validator for thumbnail URL
+  thumbnailValidator(control: FormControl) {
+    const value = control.value || '';
+    if (
+      value.startsWith('http://') ||
+      value.startsWith('https://') ||
+      value.startsWith('data:image/')
+    ) {
+      return null;
+    }
+    return { invalidThumbnail: true };
   }
 
   initializeForms() {
@@ -110,17 +134,27 @@ export class CoursesComponent implements OnInit {
         en: ['beginner', Validators.required],
         ar: ['مبتدئ', Validators.required],
       }),
+      language: this.fb.group({
+        en: ['English', Validators.required],
+        ar: ['الإنجليزية', Validators.required],
+      }),
       duration: [0, [Validators.required, Validators.min(1)]],
       isFree: [false],
-      thumbnailImgUrl: [''],
-      availableLanguages: [[]],
+      thumbnail: ['', [Validators.required, this.thumbnailValidator]],
+      freeLessons: [[]],
+      enrollmentCount: [0],
+      rating: this.fb.group({
+        average: [0],
+        count: [0],
+      }),
+      lastUpdated: [new Date()],
     });
 
     this.updateForm = this.fb.group({
       _id: [''],
       title: this.fb.group({
         en: ['', Validators.required],
-        ar: [''],
+        ar: ['', Validators.required],
       }),
       slug: this.fb.group({
         en: ['', Validators.required],
@@ -128,12 +162,34 @@ export class CoursesComponent implements OnInit {
       }),
       description: this.fb.group({
         en: ['', Validators.required],
+        ar: ['', Validators.required],
+      }),
+      shortDescription: this.fb.group({
+        en: [''],
         ar: [''],
       }),
-      topicId: ['', Validators.required],
+      topic: ['', Validators.required],
+      subtopic: [''],
       instructor: ['', Validators.required],
-      thumbnailImgUrl: [''],
-      availableLanguages: [[]],
+      category: ['', Validators.required],
+      level: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required],
+      }),
+      language: this.fb.group({
+        en: ['', Validators.required],
+        ar: ['', Validators.required],
+      }),
+      duration: [0, [Validators.required, Validators.min(1)]],
+      isFree: [false],
+      thumbnail: ['', [Validators.required, this.thumbnailValidator]],
+      freeLessons: [[]],
+      enrollmentCount: [0],
+      rating: this.fb.group({
+        average: [0],
+        count: [0],
+      }),
+      lastUpdated: [new Date()],
     });
   }
 
@@ -142,23 +198,24 @@ export class CoursesComponent implements OnInit {
   }
 
   get activeCourses(): number {
-    return this.courses.filter((course) => course.status === 'Active').length;
+    // Assuming 'status' is a UI-only field, optional on Course interface
+    return this.courses.filter((course) => course.isFree === false).length;
   }
 
   loadCourses() {
-    this.coursesService.getCourses().subscribe(
-      (data: Course[]) => {
+    this.coursesService.getCourses().subscribe({
+      next: (data: Course[]) => {
         this.courses = data;
         this.filteredCourses = data;
       },
-      (error) => {
+      error: (error) => {
         console.error('Error loading courses:', error);
         alert('Failed to load courses. Please try again later.');
-      }
-    );
+      },
+    });
   }
 
-  loadTopics(): void {
+  loadTopics() {
     this.topicsService.getTopics().subscribe({
       next: (topics) => {
         this.topics = topics;
@@ -209,14 +266,26 @@ export class CoursesComponent implements OnInit {
   openAddForm() {
     this.addForm.reset({
       title: { en: '', ar: '' },
+      slug: { en: '', ar: '' },
       description: { en: '', ar: '' },
-      availableLanguages: ['en'],
+      shortDescription: { en: '', ar: '' },
+      topic: '',
+      subtopic: '',
+      instructor: '',
+      category: '',
+      level: { en: 'beginner', ar: 'مبتدئ' },
+      language: { en: 'English', ar: 'الإنجليزية' },
+      duration: 0,
+      isFree: false,
+      thumbnail: '',
+      freeLessons: [],
+      enrollmentCount: 0,
+      rating: { average: 0, count: 0 },
+      lastUpdated: new Date(),
     });
 
     setTimeout(() => {
-      this.dialog.open(this.addDialog, {
-        width: '800px',
-      });
+      this.dialog.open(this.addDialog, { width: '800px' });
     });
   }
 
@@ -224,77 +293,64 @@ export class CoursesComponent implements OnInit {
     this.selectedCourse = course;
     this.updateForm.patchValue({
       _id: course._id,
-      title: {
-        en: course.title?.en || '',
-        ar: course.title?.ar || '',
-      },
-      slug: {
-        en: course.slug?.en || '',
-        ar: course.slug?.ar || '',
-      },
-      description: {
-        en: course.description?.en || '',
-        ar: course.description?.ar || '',
-      },
-      topicId: course.topic || '',
-      instructor: course.instructor || '',
-      thumbnailImgUrl: course.thumbnailImgUrl || '',
-      availableLanguages: course.availableLanguages || ['en', 'ar'],
+      title: course.title,
+      slug: course.slug,
+      description: course.description,
+      shortDescription: course.shortDescription || { en: '', ar: '' },
+      topic: course.topic,
+      subtopic: course.subtopic || '',
+      instructor: course.instructor,
+      category: course.category,
+      level: course.level,
+      language: course.language,
+      duration: course.duration,
+      isFree: course.isFree,
+      thumbnail: course.thumbnail,
+      freeLessons: course.freeLessons || [],
+      enrollmentCount: course.enrollmentCount,
+      rating: course.rating,
+      lastUpdated: course.lastUpdated || new Date(),
     });
 
-    this.dialog.open(this.updateDialog, {
-      width: '800px',
-      data: { course: course },
-    });
+    this.dialog.open(this.updateDialog, { width: '800px', data: { course } });
+  }
+
+  buildCoursePayload(formValue: any) {
+    return {
+      title: formValue.title,
+      slug: formValue.slug,
+      description: formValue.description,
+      shortDescription: formValue.shortDescription,
+      topic: formValue.topic,
+      subtopic: formValue.subtopic || null,
+      instructor: formValue.instructor,
+      category: formValue.category,
+      level: formValue.level,
+      language: formValue.language,
+      duration: formValue.duration,
+      isFree: formValue.isFree,
+      thumbnail: formValue.thumbnail,
+      freeLessons: formValue.freeLessons || [],
+      enrollmentCount: formValue.enrollmentCount || 0,
+      rating: formValue.rating || { average: 0, count: 0 },
+      lastUpdated: formValue.lastUpdated || new Date(),
+    };
   }
 
   addNewCourse() {
     if (this.addForm.valid) {
-      const formValue = this.addForm.value;
+      const payload = this.buildCoursePayload(this.addForm.value);
 
-      const newCourse: Partial<Course> = {
-        title: {
-          en: formValue.title.en.trim(),
-          ar: formValue.title.ar.trim(),
-        },
-        slug: {
-          en: formValue.slug.en.trim(),
-          ar: formValue.slug.ar.trim(),
-        },
-        description: {
-          en: formValue.description.en.trim(),
-          ar: formValue.description.ar.trim(),
-        },
-        shortDescription: {
-          en: formValue.shortDescription.en.trim(),
-          ar: formValue.shortDescription.ar.trim(),
-        },
-        topic: formValue.topic,
-        subtopic: formValue.subtopic,
-        instructor: formValue.instructor,
-        category: formValue.category,
-        level: {
-          en: formValue.level.en,
-          ar: formValue.level.ar,
-        },
-        duration: formValue.duration,
-        isFree: formValue.isFree,
-        thumbnailImgUrl: formValue.thumbnailImgUrl.trim(),
-        availableLanguages: formValue.availableLanguages,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        enrollmentCount: 0,
-        rating: { average: 0, count: 0 },
-      };
-
-      this.coursesService.addCourse(newCourse).subscribe({
+      this.coursesService.addCourse(payload).subscribe({
         next: () => {
           this.loadCourses();
           this.dialog.closeAll();
         },
         error: (error) => {
           console.error('Error creating course:', error);
-          alert('Failed to add course. Please ensure all required fields are correctly filled.');
+          alert(
+            'Failed to add course. Please ensure all required fields are correctly filled.'
+          );
         },
       });
     } else {
@@ -305,15 +361,21 @@ export class CoursesComponent implements OnInit {
 
   updateCourse() {
     if (this.updateForm.valid && this.selectedCourse?._id) {
-      this.coursesService.updateCourse(this.selectedCourse._id, this.updateForm.value).subscribe({
+      const payload = this.buildCoursePayload(this.updateForm.value);
+
+      this.coursesService.updateCourse(this.selectedCourse._id, payload).subscribe({
         next: () => {
           this.loadCourses();
           this.dialog.closeAll();
         },
         error: (err) => {
-          console.error('Update topic error:', err);
+          console.error('Error updating course:', err);
+          alert('Failed to update course. Please check the fields.');
         },
       });
+    } else {
+      this.updateForm.markAllAsTouched();
+      alert('Please complete all required fields before submitting.');
     }
   }
 
@@ -325,6 +387,7 @@ export class CoursesComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting course:', error);
+          alert('Failed to delete course. Please try again.');
         },
       });
     }
@@ -336,20 +399,23 @@ export class CoursesComponent implements OnInit {
 
   filterCourses() {
     const search = this.searchControl.value?.toLowerCase() || '';
-    this.filteredCourses = this.courses.filter((course) => {
-      const matchesSearch =
-        course.title?.en?.toLowerCase().includes(search) ||
-        course.slug?.en?.toLowerCase().includes(search) ||
-        course.instructor?.toLowerCase().includes(search);
-      return matchesSearch;
-    });
+    this.filteredCourses = this.courses.filter((course) =>
+      course.title.en.toLowerCase().includes(search) ||
+      course.slug.en.toLowerCase().includes(search) ||
+      (course.instructorDetails &&
+        (
+          course.instructorDetails.profile.firstName?.en?.toLowerCase().includes(search) ||
+          course.instructorDetails.profile.lastName?.en?.toLowerCase().includes(search)
+        )
+      )
+    );
   }
 
-  filterCoursesTopic() {
+  filterCoursesByTopic() {
     const topicId = this.selectedTopic.value;
-    this.filteredCourses = this.courses.filter((course) => {
-      return topicId === '' || course.topic === topicId;
-    });
+    this.filteredCourses = this.courses.filter((course) =>
+      topicId === '' || course.topic === topicId
+    );
   }
 
   clearFilters() {

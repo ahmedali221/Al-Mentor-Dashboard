@@ -163,8 +163,9 @@ export class CLessonsComponent implements OnInit {
   }
 
   get activeLessons(): number {
-    return this.lessons.filter(lesson => lesson.status === 'Active').length;
+    return this.lessons.filter(lesson => lesson.status === 'active').length;
   }
+
 
   openAddForm() {
     this.addForm.reset({
