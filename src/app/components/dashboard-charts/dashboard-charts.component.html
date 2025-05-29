@@ -1,0 +1,182 @@
+<div class="dashboard-charts-container">
+  <div class="header">
+    <h1>Dashboard Analytics</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card">
+        <mat-icon>people</mat-icon>
+        <div class="card-content">
+          <h3>Total Users</h3>
+          <p class="number">{{ totalStudents }}</p>
+        </div>
+      </div>
+      <div class="summary-card">
+        <mat-icon>school</mat-icon>
+        <div class="card-content">
+          <h3>Total Instructors</h3>
+          <p class="number">{{ totalInstructors }}</p>
+        </div>
+      </div>
+      <div class="summary-card">
+        <mat-icon>book</mat-icon>
+        <div class="card-content">
+          <h3>Total Courses</h3>
+          <p class="number">{{ totalCourses }}</p>
+        </div>
+      </div>
+      <div class="summary-card">
+        <mat-icon>subscriptions</mat-icon>
+        <div class="card-content">
+          <h3>Total Subscriptions</h3>
+          <p class="number">{{ totalSubscriptions }}</p>
+        </div>
+      </div>
+      <div class="summary-card">
+        <mat-icon>library_books</mat-icon>
+        <div class="card-content">
+          <h3>Total Programs</h3>
+          <p class="number">{{ totalPrograms }}</p>
+        </div>
+      </div>
+      <div class="summary-card">
+        <mat-icon>category</mat-icon>
+        <div class="card-content">
+          <h3>Total Categories</h3>
+          <p class="number">{{ totalCategories }}</p>
+        </div>
+      </div>
+      <div class="summary-card">
+        <mat-icon>topic</mat-icon>
+        <div class="card-content">
+          <h3>Total Topics</h3>
+          <p class="number">{{ totalTopics }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+      <!-- Users by Role -->
+      <div class="chart-card" *ngIf="chartData.usersByRole?.length">
+        <h3>Users by Role</h3>
+        <div class="chart-container">
+          <ngx-charts-pie-chart
+            [results]="chartData.usersByRole"
+            [scheme]="colorScheme"
+            [legend]="true"
+            [labels]="true"
+            [doughnut]="true"
+            [animations]="true"
+          >
+          </ngx-charts-pie-chart>
+        </div>
+      </div>
+
+      <!-- Courses by Category -->
+      <div class="chart-card" *ngIf="chartData.coursesByCategory?.length">
+        <h3>Courses by Category</h3>
+        <div class="chart-container">
+          <ngx-charts-pie-chart
+            [results]="chartData.coursesByCategory"
+            [scheme]="colorScheme"
+            [legend]="true"
+            [labels]="true"
+            [doughnut]="true"
+            [animations]="true"
+          >
+          </ngx-charts-pie-chart>
+        </div>
+      </div>
+
+      <!-- Topics by Category -->
+      <div class="chart-card" *ngIf="chartData.topicsByCategory?.length">
+        <h3>Topics by Category</h3>
+        <div class="chart-container">
+          <ngx-charts-pie-chart
+            [results]="chartData.topicsByCategory"
+            [scheme]="colorScheme"
+            [legend]="true"
+            [labels]="true"
+            [doughnut]="true"
+            [animations]="true"
+          >
+          </ngx-charts-pie-chart>
+        </div>
+      </div>
+
+      <!-- Programs by Level -->
+      <div class="chart-card" *ngIf="chartData.programsByStatus?.length">
+        <h3>Programs by Level</h3>
+        <div class="chart-container">
+          <ngx-charts-pie-chart
+            [results]="chartData.programsByStatus"
+            [scheme]="colorScheme"
+            [legend]="true"
+            [labels]="true"
+            [doughnut]="true"
+            [animations]="true"
+          >
+          </ngx-charts-pie-chart>
+        </div>
+      </div>
+
+      <!-- Subscriptions by Month -->
+      <div class="chart-card" *ngIf="chartData.subscriptionsByMonth?.length">
+        <h3>Subscriptions by Month</h3>
+        <div class="chart-container">
+          <ngx-charts-bar-vertical
+            [results]="chartData.subscriptionsByMonth"
+            [scheme]="colorScheme"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="false"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Month"
+            yAxisLabel="Count"
+            [animations]="true"
+          >
+          </ngx-charts-bar-vertical>
+        </div>
+      </div>
+
+      <!-- Subscription Growth -->
+      <div
+        class="chart-card"
+        *ngIf="chartData.subscriptionsOverTime[0]?.series?.length"
+      >
+        <h3>Subscription Growth</h3>
+        <div class="chart-container">
+          <ngx-charts-line-chart
+            [results]="chartData.subscriptionsOverTime"
+            [scheme]="colorScheme"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Time"
+            yAxisLabel="Total Subscriptions"
+            [autoScale]="true"
+            [timeline]="true"
+            [animations]="true"
+          >
+          </ngx-charts-line-chart>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
