@@ -10,7 +10,7 @@ import { CategoryComponent } from './components/category/category.component';
 import { ProgramDetailsComponent } from './components/program-details/program-details.component';
 import { PaymentsComponent } from './components/payments/payments.component';
 import { SubTopicsComponent } from './components/sub-topics/sub-topics.component';
-
+import { DashboardChartsComponent } from './components/dashboard-charts/dashboard-charts.component';
 import { SubscriptionsComponent } from './components/subscriptions/subscriptions.component';
 import { UserSubscriptionsComponent } from './components/user-subscriptions/user-subscriptions.component';
 
@@ -19,6 +19,7 @@ export const routes: Routes = [
     path: '',
     component: DashboardComponent,
     children: [
+      { path: 'dashboard', component: DashboardChartsComponent },
       { path: 'users', component: UsersComponent },
       { path: 'instructors', component: InstructorsComponent },
       { path: 'courses', component: CoursesComponent },
@@ -37,9 +38,8 @@ export const routes: Routes = [
       { path: 'payments', component: PaymentsComponent },
       { path: 'SubTopics', component: SubTopicsComponent },
       { path: 'categories', component: CategoryComponent },
-      { path: '', redirectTo: 'users', pathMatch: 'full' }
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
-
 ]
 
