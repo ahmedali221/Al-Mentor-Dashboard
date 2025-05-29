@@ -140,13 +140,21 @@ export class CLessonsComponent implements OnInit {
     this.isLoading = true;
     this.lessonsService.getLessons().subscribe({
       next: (data: Lesson[]) => {
+        console.log('Raw lessons data from API:', data);
         this.lessons = data.map(lesson => {
+          console.log('Processing lesson:', lesson.title?.en, {
+            availableLanguages: lesson.availableLanguages,
+            status: lesson.status
+          });
           const course = this.courses.find(c => c._id === lesson.course?._id);
           return {
             ...lesson,
-            courseName: course?.title?.en || 'Unknown Course'
+            courseName: course?.title?.en || 'Unknown Course',
+            availableLanguages: lesson.availableLanguages || ['en'],
+            status: lesson.status || 'Inactive'
           };
         });
+        console.log('Processed lessons:', this.lessons);
         this.filteredLessons = [...this.lessons];
         this.isLoading = false;
       },
