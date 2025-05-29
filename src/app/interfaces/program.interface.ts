@@ -1,29 +1,17 @@
 import { Course } from "./course";
 import { MultilingualString } from "./multilingual-string.interface";
 
-export interface program {
+export interface Program {
     _id: string;
     title: MultilingualString;
-    slug: string;
+    slug: MultilingualString; // Changed to MultilingualString
     description: MultilingualString;
     thumbnail: string;
     level: MultilingualString;
-    language: string;
+    language: "ar" | "en";
     totalDuration: number;
-    courses: Course[];
-    learningOutcomes: string[];
+    courses: string[]; // Array of Course ObjectIDs
+    learningOutcomes: MultilingualString[]; // Array of MultilingualString objects
     category: MultilingualString;
-    coursesDetails: string[];
+    courseDetails?: Course[]; // Optional, when populated
 }
-
-
-
-
-
-
-
-
-
-
-
-

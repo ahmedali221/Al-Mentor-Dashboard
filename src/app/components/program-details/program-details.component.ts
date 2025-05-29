@@ -2,19 +2,20 @@ import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProgramsService } from '../../services/programs.service';
 import { CoursesService } from '../../services/course.service';
-import { program } from '../../interfaces/program.interface';
-import { CommonModule, Location } from '@angular/common';
+import { Program } from '../../interfaces/program.interface';
+import { Location, CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatList, MatListItem } from '@angular/material/list';
 import { Course } from '../../interfaces/course';
+import { MultilingualString } from '../../interfaces/multilingual-string.interface';
 
 @Component({
   selector: 'app-program-details',
@@ -39,10 +40,10 @@ import { Course } from '../../interfaces/course';
 export class ProgramDetailsComponent implements OnInit {
   @ViewChild('updateDetailsDialog') updateDetailsDialog!: TemplateRef<any>;
 
-  program!: program;
+  program!: Program;
   loading = true;
   updateForm!: FormGroup;
-  selectedProgram!: program;
+  selectedProgram!: Program;
   allCourses: Course[] = [];
   unassociatedCourses: Course[] = [];
   selectedCourseId: string | null = null;
@@ -54,19 +55,42 @@ export class ProgramDetailsComponent implements OnInit {
     private location: Location,
     private fb: FormBuilder,
     private dialog: MatDialog
-  ) {
-    this.createForm();
-  }
+  ) {}
 
-  createForm() {
+  createForm(program?: Program) {
     this.updateForm = this.fb.group({
-      title: ['', Validators.required],
-      slug: ['', Validators.required],
-      description: ['', Validators.required],
-      thumbnail: ['', Validators.required],
-      level: ['', Validators.required],
-      language: ['', Validators.required],
-      category: ['', Validators.required],      totalDuration: ['', Validators.required]
+      title: this.fb.group({
+        en: [program?.title?.en || '', Validators.required],
+        ar: [program?.title?.ar || '', Validators.required]
+      }),
+      slug: this.fb.group({
+        en: [program?.slug?.en || '', Validators.required],
+        ar: [program?.slug?.ar || '', Validators.required]
+      }),
+      description: this.fb.group({
+        en: [program?.description?.en || '', Validators.required],
+        ar: [program?.description?.ar || '', Validators.required]
+      }),
+      thumbnail: [program?.thumbnail || '', Validators.required],
+      level: this.fb.group({
+        en: [program?.level?.en || '', Validators.required],
+        ar: [program?.level?.ar || '', Validators.required]
+      }),
+      language: [program?.language || '', Validators.required],
+      category: this.fb.group({
+        en: [program?.category?.en || '', Validators.required],
+        ar: [program?.category?.ar || '', Validators.required]
+      }),
+      totalDuration: [program?.totalDuration || '', Validators.required],
+      courses: [program?.courses || []], // Array of string ids
+      learningOutcomes: this.fb.array(
+        (program?.learningOutcomes || []).map(outcome =>
+          this.fb.group({
+            en: [outcome.en, Validators.required],
+            ar: [outcome.ar, Validators.required]
+          })
+        )
+      )
     });
   }
 
@@ -75,18 +99,11 @@ export class ProgramDetailsComponent implements OnInit {
     if (programId) {
       this.programsService.getProgramById(programId).subscribe({
         next: (program) => {
-          this.program = {
-            ...program,
-            courses: program.courses?.map(c => ({
-              ...c,
-              title: {
-                en: c.title?.en || 'Untitled Course',
-                ar: c.title?.ar || ''
-              },
-            })) || []
-          };
+          this.program = program;
+          this.createForm(this.program);
           this.loading = false;
           this.loadCourses();
+          
         },
         error: () => {
           this.loading = false;
@@ -99,23 +116,15 @@ export class ProgramDetailsComponent implements OnInit {
     this.coursesService.getCourses().subscribe({
       next: (courses) => {
         this.allCourses = courses;
+       this.addCourseToProgram();
         this.updateUnassociatedCourses();
       }
     });
   }
 
-  openUpdateDetailsForm(program: program): void {
+  openUpdateDetailsForm(program: Program): void {
     this.selectedProgram = program;
-    this.updateForm.patchValue({
-      title: program.title,
-      slug: program.slug,
-      description: program.description,
-      thumbnail: program.thumbnail,
-      level: program.level,
-      language: program.language,
-      category: program.category,
-      totalDuration: program.totalDuration
-    });
+    this.createForm(program);
 
     this.dialog.open(this.updateDetailsDialog, {
       width: '800px'
@@ -123,8 +132,12 @@ export class ProgramDetailsComponent implements OnInit {
   }
 
   updateProgram(): void {
-    if (this.updateForm.valid) {
-      const updatedProgram = { ...this.selectedProgram, ...this.updateForm.value };
+    if (this.updateForm.valid && this.selectedProgram) {
+      const updatedProgram: Program = {
+        ...this.selectedProgram,
+        ...this.updateForm.value,
+        courses: this.updateForm.value.courses
+      };
       this.programsService.updateProgram(updatedProgram).subscribe({
         next: () => {
           this.program = updatedProgram;
@@ -136,35 +149,41 @@ export class ProgramDetailsComponent implements OnInit {
 
   updateUnassociatedCourses() {
     if (this.program && this.allCourses) {
+      const courseIds = this.program.courses || [];
       this.unassociatedCourses = this.allCourses.filter(course =>
-        !this.program.courses.some(programCourse => programCourse._id === course._id)
+        !courseIds.includes(course._id)
       );
     }
   }
 
   addCourseToProgram() {
     if (this.selectedCourseId && this.program) {
-      const courseToAdd = this.allCourses.find(c => c._id === this.selectedCourseId);
-      if (courseToAdd) {
-        this.program.courses.push(courseToAdd);
-        this.programsService.updateProgram(this.program).subscribe({
-          next: () => {
-            this.updateUnassociatedCourses();
-            this.selectedCourseId = null;
-          }
-        });
+      if (!this.program.courses.includes(this.selectedCourseId)) {
+        const updatedCourses = [...this.program.courses, this.selectedCourseId];
+        this.programsService
+          .updateProgram({ ...this.program, courses: updatedCourses })
+          .subscribe({
+            next: (updated) => {
+              this.program.courses = updated.courses;
+              this.updateUnassociatedCourses();
+              this.selectedCourseId = null;
+            }
+          });
       }
     }
   }
 
   removeCourseFromProgram(courseId: string) {
     if (this.program) {
-      this.program.courses = this.program.courses.filter(c => c._id !== courseId);
-      this.programsService.updateProgram(this.program).subscribe({
-        next: () => {
-          this.updateUnassociatedCourses();
-        }
-      });
+      const updatedCourses = this.program.courses.filter(id => id !== courseId);
+      this.programsService
+        .updateProgram({ ...this.program, courses: updatedCourses })
+        .subscribe({
+          next: (updated) => {
+            this.program.courses = updated.courses;
+            this.updateUnassociatedCourses();
+          }
+        });
     }
   }
 
@@ -176,7 +195,6 @@ export class ProgramDetailsComponent implements OnInit {
             this.goBack();
           }
         });
-        alert('Program deleted successfully');
       }
     }
   }

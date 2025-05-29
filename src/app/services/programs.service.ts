@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { program } from '../interfaces/program.interface';
+import {  Program } from '../interfaces/program.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -12,27 +12,27 @@ export class ProgramsService {
 
   constructor(private http: HttpClient) { }
 
-  getPrograms(): Observable<program[]> {
+  getPrograms(): Observable<Program[]> {
     console.log("Fetching data from ", this.apiUrl);
-    return this.http.get<program[]>(this.apiUrl);
+    return this.http.get<Program[]>(this.apiUrl);
   }
 
-  addProgram(program: program): Observable<program> {
-    return this.http.post<program>(this.apiUrl, program);
+  addProgram(program: Program): Observable<Program> {
+    return this.http.post<Program>(this.apiUrl, program);
   }
 
-  getProgramById(id: string): Observable<program> {
-    return this.http.get<program>(`${this.apiUrl}/${id}`);
+  getProgramById(id: string): Observable<Program> {
+    return this.http.get<Program>(`${this.apiUrl}/${id}`);
   }
 
-  getProgramByCategory(category: string): Observable<program[]> {
+  getProgramByCategory(category: string): Observable<Program[]> {
     const url = `${this.apiUrl}?category=${category}`;
-    return this.http.get<program[]>(url);
+    return this.http.get<Program[]>(url);
   }
 
-  updateProgram(program: program): Observable<program> {
+  updateProgram(program: Program): Observable<Program> {
     const url = `${this.apiUrl}/${program._id}`;
-    return this.http.put<program>(url, program);
+    return this.http.put<Program>(url, program);
   }
 
   deleteProgram(id: string): Observable<void> {
