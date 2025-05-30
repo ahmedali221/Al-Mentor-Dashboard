@@ -46,7 +46,6 @@ export class CoursesComponent implements OnInit {
 
   courses: Course[] = [];
   filteredCourses: Course[] = [];
-  lessonsCount: number = 0;
   topics: Topic[] = [];
   categories: any[] = [];
   instructors: any[] = [];
@@ -86,7 +85,6 @@ export class CoursesComponent implements OnInit {
     this.loadCategories();
     this.loadInstructors();
     this.loadSubtopics();
- 
 
     this.searchControl.valueChanges.subscribe(() => {
       this.filterCourses();
