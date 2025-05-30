@@ -1,6 +1,6 @@
 import { Course } from './course';
 
-export interface program {
+export interface Program {
     _id: string;
     title: {
         en: string;

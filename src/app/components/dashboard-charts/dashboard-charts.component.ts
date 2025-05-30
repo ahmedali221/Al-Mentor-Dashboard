@@ -14,7 +14,7 @@ import { User } from '../../interfaces/user.interface';
 import { Course } from '../../interfaces/course';
 import { Subscription } from '../../interfaces/subscriptions';
 import { Category } from '../../interfaces/category.interface';
-import { program } from '../../interfaces/program.interface';
+import { Program } from '../../interfaces/program.interface';
 import { Topic } from '../../interfaces/topic.interface';
 import { Instructor } from '../../interfaces/instructor.interface';
 
@@ -47,7 +47,7 @@ export class DashboardChartsComponent implements OnInit {
   courses: Course[] = [];
   subscriptions: Subscription[] = [];
   allCategories: Category[] = [];
-  programs: program[] = [];
+  programs: Program[] = [];
   topics: Topic[] = [];
   categoryNameMap = new Map<string, string>();
 
@@ -101,7 +101,7 @@ export class DashboardChartsComponent implements OnInit {
   loadPrograms(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.programsService.getPrograms().subscribe({
-        next: (programs: program[]) => {
+        next: (programs: Program[]) => {
           this.programs = programs;
           // Create program distribution by level
           const levelCounts = new Map<string, number>();

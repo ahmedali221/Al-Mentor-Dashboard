@@ -126,6 +126,7 @@ export class CLessonsComponent implements OnInit {
     return this.lessons.filter(lesson => lesson.isPublished).length;
   }
 
+
   openAddForm() {
     this.addForm.reset({
       title: { en: '', ar: '' },
