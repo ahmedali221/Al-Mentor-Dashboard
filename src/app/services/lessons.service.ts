@@ -11,20 +11,13 @@ import { Lesson } from '../interfaces/lesson';
 })
 export class LessonsService {
   private apiUrl = `${environment.apiUrl}`;
- 
-  constructor(private http: HttpClient) {}
+
+  constructor(private http: HttpClient) { }
 
   getLessons(): Observable<Lesson[]> {
-    console.log('Fetching lessons from:', `${this.apiUrl}/lessons`);
     return this.http.get<Lesson[]>(`${this.apiUrl}/lessons`)
       .pipe(
-        tap(lessons => {
-          // console.log(`Fetched ${lessons.length} lessons`);
-          // console.log('Lessons from API:', lessons);
-          lessons.forEach(lesson => {
-            // console.log('Lesson:', lesson.title?.en, 'course:', lesson.course);
-          });
-        }),
+        tap(lessons => console.log('Fetched lessons:', lessons)),
         catchError(this.handleError('getLessons'))
       );
   }
@@ -36,22 +29,18 @@ export class LessonsService {
       );
   }
 
-  addLesson(lesson: any): Observable<any> {
-    console.log('Sending ADD lesson data to API:', lesson);
-    return this.http.post<any>(`${this.apiUrl}/lessons`, lesson)
+  addLesson(lesson: Partial<Lesson>): Observable<Lesson> {
+    return this.http.post<Lesson>(`${this.apiUrl}/lessons`, lesson)
       .pipe(
-        tap(response => console.log('Add lesson API response:', response)),
+        tap(response => console.log('Add lesson response:', response)),
         catchError(this.handleError('addLesson'))
       );
   }
 
-  updateLesson(id: string, lesson: any): Observable<any> {
-    console.log(`Sending UPDATE lesson data to API for ID ${id}:`, lesson);
-    console.log('UPDATE endpoint:', `${this.apiUrl}/lessons/${id}`);
-    
-    return this.http.put<any>(`${this.apiUrl}/lessons/${id}`, lesson)
+  updateLesson(id: string, lesson: Partial<Lesson>): Observable<Lesson> {
+    return this.http.put<Lesson>(`${this.apiUrl}/lessons/${id}`, lesson)
       .pipe(
-        tap(response => console.log('Update lesson API response:', response)),
+        tap(response => console.log('Update lesson response:', response)),
         catchError(this.handleError('updateLesson'))
       );
   }
@@ -64,31 +53,31 @@ export class LessonsService {
   }
 
   getLessonsByCourse(courseId: string): Observable<Lesson[]> {
-    return this.http.get<Lesson[]>(`${this.apiUrl}/lessons/course/${courseId}`);
+    return this.http.get<Lesson[]>(`${this.apiUrl}/lessons/course/${courseId}`)
+      .pipe(
+        catchError(this.handleError('getLessonsByCourse'))
+      );
   }
 
-  // Generic error handler with contextual information
+  getLessonById(id: string): Observable<Lesson> {
+    return this.http.get<Lesson>(`${this.apiUrl}/lessons/${id}`)
+      .pipe(
+        catchError(this.handleError('getLessonById'))
+      );
+  }
+
   private handleError(operation = 'operation') {
     return (error: HttpErrorResponse): Observable<never> => {
       console.error(`${operation} failed:`, error);
-      
-      // Log detailed error information
+
+      let errorMessage = 'An error occurred';
       if (error.error instanceof ErrorEvent) {
-        // Client-side error
-        console.error(`Client-side error: ${error.error.message}`);
+        errorMessage = `Client-side error: ${error.error.message}`;
       } else {
-        // Server-side error
-        console.error(`Server returned code ${error.status}, body:`, error.error);
-        
-        // Log API response details if available
-        if (error.error) {
-          console.error('Error details:', error.error);
-        }
+        errorMessage = `Server returned code ${error.status}, body: ${JSON.stringify(error.error)}`;
       }
-      
-      // Return an observable with a user-facing error message
-      const message = error.error?.message || error.message || `Error in ${operation}`;
-      return throwError(() => new Error(message));
+
+      return throwError(() => new Error(errorMessage));
     };
   }
 }

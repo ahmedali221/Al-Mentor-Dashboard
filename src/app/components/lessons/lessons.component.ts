@@ -1,4 +1,3 @@
-import { Course } from './../../interfaces/course';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,14 +16,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { LessonsService } from '../../services/lessons.service';
 import { Lesson } from '../../interfaces/lesson';
 import { debounceTime } from 'rxjs/operators';
-
-function objectIdValidator(control: FormControl) {
-  if (!control.value) {
-    return null;
-  }
-  const valid = /^[0-9a-fA-F]{24}$/.test(control.value);
-  return valid ? null : { invalidObjectId: { value: control.value } };
-}
 
 @Component({
   selector: 'app-lessons',
@@ -52,16 +43,13 @@ export class CLessonsComponent implements OnInit {
 
   lessons: Lesson[] = [];
   filteredLessons: Lesson[] = [];
-  courses: Course[] = [];
-  displayedColumns: string[] = ['title', 'courseName', 'duration', 'availableLanguages', 'status', 'actions'];
+  displayedColumns: string[] = ['title', 'module', 'course', 'duration', 'isPublished', 'isFree', 'actions'];
 
   searchControl = new FormControl('');
   selectedCourse = new FormControl('');
-  selectedCourseId: string = '';
   addForm!: FormGroup;
   updateForm!: FormGroup;
   selectedLesson: Lesson | null = null;
-  lesson: any;
   isLoading: boolean = false;
 
   constructor(
@@ -77,40 +65,33 @@ export class CLessonsComponent implements OnInit {
     const commonFormStructure = {
       title: this.fb.group({
         en: ['', Validators.required],
-        ar: ['']
+        ar: ['', Validators.required]
       }),
       description: this.fb.group({
         en: ['', Validators.required],
-        ar: ['']
+        ar: ['', Validators.required]
       }),
-      courseId: ['', Validators.required],
-      module: ['', objectIdValidator],
+      content: this.fb.group({
+        articleText: this.fb.group({
+          en: [''],
+          ar: ['']
+        }),
+        videoUrl: [''],
+        attachments: [[]]
+      }),
+      module: ['', Validators.required],
       order: [0, Validators.required],
       duration: [0, Validators.required],
-      availableLanguages: [['en'], Validators.required],
-      status: ['Active']
+      isFree: [false],
+      isPublished: [false]
     };
 
-    this.addForm = this.fb.group({
-      ...commonFormStructure,
-      instructor: [''],
-      content: ['']
-    });
-
+    this.addForm = this.fb.group(commonFormStructure);
     this.updateForm = this.fb.group(commonFormStructure);
   }
 
   ngOnInit(): void {
-    this.lessonsService.getCourses().subscribe({
-      next: (courses) => {
-        this.courses = courses;
-        this.loadLessons();
-      },
-      error: (error) => {
-        console.error('Error loading courses:', error);
-        this.snackBar.open(`Failed to load courses: ${error.message}`, 'Close', { duration: 5000 });
-      }
-    });
+    this.loadLessons();
 
     this.searchControl.valueChanges
       .pipe(debounceTime(300))
@@ -121,40 +102,11 @@ export class CLessonsComponent implements OnInit {
       .subscribe(() => this.filterLessons());
   }
 
-  loadCourses(): void {
-    this.isLoading = true;
-    this.lessonsService.getCourses().subscribe({
-      next: (courses) => {
-        this.courses = courses;
-        this.loadLessons();
-      },
-      error: (error) => {
-        console.error('Error loading courses:', error);
-        this.isLoading = false;
-        this.snackBar.open(`Failed to load courses: ${error.message}`, 'Close', { duration: 5000 });
-      }
-    });
-  }
-
   loadLessons() {
     this.isLoading = true;
     this.lessonsService.getLessons().subscribe({
       next: (data: Lesson[]) => {
-        console.log('Raw lessons data from API:', data);
-        this.lessons = data.map(lesson => {
-          console.log('Processing lesson:', lesson.title?.en, {
-            availableLanguages: lesson.availableLanguages,
-            status: lesson.status
-          });
-          const course = this.courses.find(c => c._id === lesson.course?._id);
-          return {
-            ...lesson,
-            courseName: course?.title?.en || 'Unknown Course',
-            availableLanguages: lesson.availableLanguages || ['en'],
-            status: lesson.status || 'Inactive'
-          };
-        });
-        console.log('Processed lessons:', this.lessons);
+        this.lessons = data;
         this.filteredLessons = [...this.lessons];
         this.isLoading = false;
       },
@@ -170,56 +122,59 @@ export class CLessonsComponent implements OnInit {
     return this.lessons.length;
   }
 
-  get activeLessons(): number {
-    return this.lessons.filter(lesson => lesson.status === 'Active').length;
+  get publishedLessons(): number {
+    return this.lessons.filter(lesson => lesson.isPublished).length;
   }
 
   openAddForm() {
     this.addForm.reset({
       title: { en: '', ar: '' },
       description: { en: '', ar: '' },
-      availableLanguages: ['en'],
-      courseId: '',
-      content: '',
+      content: {
+        articleText: { en: '', ar: '' },
+        videoUrl: '',
+        attachments: []
+      },
       module: '',
       order: 0,
       duration: 0,
-      status: 'Active'
+      isFree: false,
+      isPublished: false
     });
 
-    setTimeout(() => {
-      this.dialog.open(this.addDialog, { width: '800px' });
-    });
+    this.dialog.open(this.addDialog, { width: '800px' });
   }
 
   openUpdateForm(lesson: Lesson) {
-    this.selectedLesson = { ...lesson };
-    this.updateForm.reset();
+    if (!lesson) return;
 
+    this.selectedLesson = { ...lesson };
     this.updateForm.patchValue({
-      title: {
-        en: lesson.title?.en || '',
-        ar: lesson.title?.ar || ''
+      title: lesson.title || { en: '', ar: '' },
+      description: lesson.description || { en: '', ar: '' },
+      content: lesson.content || {
+        articleText: { en: '', ar: '' },
+        videoUrl: '',
+        attachments: []
       },
-      description: {
-        en: lesson.description?.en || '',
-        ar: lesson.description?.ar || ''
-      },
-      courseId: lesson.courseId || '',
+      module: lesson.module?._id || '',
       order: lesson.order || 0,
       duration: lesson.duration || 0,
-      module: lesson.module || '',
-      availableLanguages: lesson.availableLanguages || ['en'],
-      status: lesson.status || 'Active'
+      isFree: lesson.isFree || false,
+      isPublished: lesson.isPublished || false
     });
 
-    this.dialog.open(this.updateDialog, { width: '800px', data: { lesson: lesson } });
+    this.dialog.open(this.updateDialog, { width: '800px' });
   }
 
   addNewLesson() {
     if (this.addForm.valid) {
       const formValue = this.addForm.value;
+      this.isLoading = true;
+
+      // Ensure all required fields are present
       const newLesson = {
+        ...formValue,
         title: {
           en: formValue.title?.en?.trim() || '',
           ar: formValue.title?.ar?.trim() || ''
@@ -228,15 +183,16 @@ export class CLessonsComponent implements OnInit {
           en: formValue.description?.en?.trim() || '',
           ar: formValue.description?.ar?.trim() || ''
         },
-        courseId: formValue.courseId || '',
-        ...(formValue.module && formValue.module.trim() !== '' ? { module: formValue.module } : {}),
-        order: Number(formValue.order) || 0,
-        duration: Number(formValue.duration) || 0,
-        availableLanguages: formValue.availableLanguages || ['en'],
-        status: 'Active'
+        content: {
+          articleText: {
+            en: formValue.content?.articleText?.en?.trim() || '',
+            ar: formValue.content?.articleText?.ar?.trim() || ''
+          },
+          videoUrl: formValue.content?.videoUrl?.trim() || '',
+          attachments: formValue.content?.attachments || []
+        }
       };
 
-      this.isLoading = true;
       this.lessonsService.addLesson(newLesson).subscribe({
         next: (response) => {
           this.loadLessons();
@@ -260,7 +216,11 @@ export class CLessonsComponent implements OnInit {
   updateLesson() {
     if (this.updateForm.valid && this.selectedLesson?._id) {
       const formValue = this.updateForm.value;
-      const updateData = {
+      this.isLoading = true;
+
+      // Ensure all required fields are present
+      const updatedLesson = {
+        ...formValue,
         title: {
           en: formValue.title?.en?.trim() || '',
           ar: formValue.title?.ar?.trim() || ''
@@ -269,72 +229,36 @@ export class CLessonsComponent implements OnInit {
           en: formValue.description?.en?.trim() || '',
           ar: formValue.description?.ar?.trim() || ''
         },
-        courseId: formValue.courseId || '',
-        order: Number(formValue.order) || 0,
-        duration: Number(formValue.duration) || 0,
-        module: formValue.module || '',
-        availableLanguages: formValue.availableLanguages || ['en'],
-        status: formValue.status || 'Active'
+        content: {
+          articleText: {
+            en: formValue.content?.articleText?.en?.trim() || '',
+            ar: formValue.content?.articleText?.ar?.trim() || ''
+          },
+          videoUrl: formValue.content?.videoUrl?.trim() || '',
+          attachments: formValue.content?.attachments || []
+        }
       };
 
-      this.isLoading = true;
-      this.lessonsService.updateLesson(this.selectedLesson._id, updateData)
-        .subscribe({
-          next: (response) => {
-            this.loadLessons();
-            this.dialog.closeAll();
-            this.isLoading = false;
-            this.snackBar.open('Lesson updated successfully', 'Close', { duration: 3000 });
-          },
-          error: (error) => {
-            console.error('Error updating lesson:', error);
-            this.isLoading = false;
-            this.snackBar.open(`Failed to update lesson: ${error.message || 'Unknown error'}`, 'Close', { duration: 5000 });
-          }
-        });
+      this.lessonsService.updateLesson(this.selectedLesson._id, updatedLesson).subscribe({
+        next: (response) => {
+          this.loadLessons();
+          this.dialog.closeAll();
+          this.isLoading = false;
+          this.snackBar.open('Lesson updated successfully', 'Close', { duration: 3000 });
+        },
+        error: (error) => {
+          console.error('Error updating lesson:', error);
+          this.isLoading = false;
+          this.snackBar.open(`Failed to update lesson: ${error.message}`, 'Close', { duration: 5000 });
+        }
+      });
     } else {
       this.updateForm.markAllAsTouched();
       const invalidControls = this.getFormValidationErrors(this.updateForm);
-      
-      if (!this.selectedLesson?._id) {
-        this.snackBar.open('Cannot update: Missing lesson ID', 'Close', { duration: 5000 });
-      } else {
-        this.snackBar.open('Please fill in all required fields: ' + invalidControls.join(', '), 'Close', { duration: 5000 });
-      }
+      this.snackBar.open('Please fill in all required fields: ' + invalidControls.join(', '), 'Close', { duration: 5000 });
     }
   }
 
-  filterLessons() {
-    const search = this.searchControl.value?.toLowerCase() || '';
-    const courseId = this.selectedCourse.value || '';
-
-    this.filteredLessons = this.lessons
-      .filter(lesson => this.matchesSearch(lesson, search))
-      .filter(lesson => this.matchesCourse(lesson, courseId));
-  }
-
-  private matchesCourse(lesson: Lesson, courseId: string): boolean {
-    if (!courseId) return true;
-    return lesson.courseId === courseId || lesson.course?._id === courseId;
-  }
-  
-  private matchesSearch(lesson: Lesson, search: string): boolean {
-    if (!search) return true;
-    return (
-      lesson.title?.en?.toLowerCase().includes(search) ||
-      lesson.title?.ar?.toLowerCase()?.includes(search) ||
-      lesson.description?.en?.toLowerCase()?.includes(search) ||
-      lesson.description?.ar?.toLowerCase()?.includes(search) ||
-      lesson._id?.toLowerCase()?.includes(search)
-    );
-  }
-
-  clearFilters() {
-    this.searchControl.setValue('');
-    this.selectedCourse.setValue('');
-    this.filteredLessons = [...this.lessons];
-  }
-  
   deleteLesson(id: string) {
     if (confirm('Are you sure you want to delete this lesson?')) {
       this.isLoading = true;
@@ -347,10 +271,33 @@ export class CLessonsComponent implements OnInit {
         error: (error) => {
           console.error('Error deleting lesson:', error);
           this.isLoading = false;
-          this.snackBar.open(`Failed to delete lesson: ${error.message || 'Unknown error'}`, 'Close', { duration: 5000 });
+          this.snackBar.open(`Failed to delete lesson: ${error.message}`, 'Close', { duration: 5000 });
         }
       });
     }
+  }
+
+  filterLessons() {
+    const search = this.searchControl.value?.toLowerCase() || '';
+    const courseId = this.selectedCourse.value || '';
+
+    this.filteredLessons = this.lessons.filter(lesson => {
+      const matchesSearch = !search ||
+        lesson.title?.en?.toLowerCase().includes(search) ||
+        lesson.title?.ar?.toLowerCase().includes(search) ||
+        lesson.description?.en?.toLowerCase().includes(search) ||
+        lesson.description?.ar?.toLowerCase().includes(search);
+
+      const matchesCourse = !courseId || lesson.course?._id === courseId;
+
+      return matchesSearch && matchesCourse;
+    });
+  }
+
+  clearFilters() {
+    this.searchControl.setValue('');
+    this.selectedCourse.setValue('');
+    this.filteredLessons = [...this.lessons];
   }
 
   closeDialog() {
@@ -360,22 +307,62 @@ export class CLessonsComponent implements OnInit {
   getFormValidationErrors(form: FormGroup): string[] {
     const result: string[] = [];
     Object.keys(form.controls).forEach(key => {
-      const controlErrors = form.get(key)?.errors;
-      if (controlErrors) {
-        Object.keys(controlErrors).forEach(keyError => {
-          result.push(`${key}: ${keyError}`);
-        });
-      }
       const control = form.get(key);
       if (control instanceof FormGroup) {
         result.push(...this.getFormValidationErrors(control));
+      } else {
+        const controlErrors = control?.errors;
+        if (controlErrors) {
+          Object.keys(controlErrors).forEach(keyError => {
+            result.push(`${key}: ${keyError}`);
+          });
+        }
       }
     });
     return result;
   }
 
-  getCourseName(courseId: string): string {
-    const course = this.courses.find(c => c._id === courseId);
-    return course?.title?.en || 'Unknown Course';
+  updateLessonStatus(lesson: Lesson, isPublished: boolean) {
+    if (!lesson?._id) return;
+
+    this.isLoading = true;
+    const updateData = {
+      isPublished: isPublished
+    };
+
+    this.lessonsService.updateLesson(lesson._id, updateData).subscribe({
+      next: (response) => {
+        this.loadLessons();
+        this.isLoading = false;
+        this.snackBar.open(`Lesson ${isPublished ? 'published' : 'unpublished'} successfully`, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error updating lesson status:', error);
+        this.isLoading = false;
+        this.snackBar.open(`Failed to update lesson status: ${error.message}`, 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  updateLessonFreeStatus(lesson: Lesson, isFree: boolean) {
+    if (!lesson?._id) return;
+
+    this.isLoading = true;
+    const updateData = {
+      isFree: isFree
+    };
+
+    this.lessonsService.updateLesson(lesson._id, updateData).subscribe({
+      next: (response) => {
+        this.loadLessons();
+        this.isLoading = false;
+        this.snackBar.open(`Lesson ${isFree ? 'marked as free' : 'marked as paid'} successfully`, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error updating lesson free status:', error);
+        this.isLoading = false;
+        this.snackBar.open(`Failed to update lesson free status: ${error.message}`, 'Close', { duration: 5000 });
+      }
+    });
   }
 }
