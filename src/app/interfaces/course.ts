@@ -1,6 +1,6 @@
 export interface Course {
   _id: string;
-  
+
   title: {
     en: string;
     ar: string;
@@ -9,11 +9,11 @@ export interface Course {
     en: string;
     ar: string;
   };
-  topic: string; 
-  subtopic?: string; 
-  instructor: string; 
-  category: string; 
-  
+  topic: string;
+  subtopic?: string;
+  instructor: string;
+  category: string;
+
 
   description: {
     en: string;
@@ -23,14 +23,14 @@ export interface Course {
     en?: string;
     ar?: string;
   };
-  modules?: string[]; 
+  modules?: string[];
   freeLessons?: {
     lessonId: string;
     title: string;
     duration: number;
   }[];
-  
-  
+
+
   level: {
     en: 'beginner' | 'intermediate' | 'advanced';
     ar: 'مبتدئ' | 'متوسط' | 'متقدم';
@@ -38,7 +38,7 @@ export interface Course {
 
   duration: number;
   lastUpdated: Date;
-  
+
 
   enrollmentCount: number;
   isFree: boolean;
@@ -55,7 +55,7 @@ export interface Course {
     expertiseAreas: any;
     profile: any;
   };
-  
+
   status?: string;
   thumbnailImgUrl?: string;
   availableLanguages?: string[];

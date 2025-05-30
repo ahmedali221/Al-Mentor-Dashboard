@@ -39,4 +39,12 @@ export class ProgramsService {
     const url = `${this.apiUrl}/${id}`;
     return this.http.delete<void>(url);
   }
+
+  addCourseToProgram(programId: string, courseId: string): Observable<program> {
+    return this.http.post<program>(`${this.apiUrl}/add-course`, { programId, courseId });
+  }
+
+  removeCourseFromProgram(programId: string, courseId: string): Observable<program> {
+    return this.http.post<program>(`${this.apiUrl}/remove-course`, { programId, courseId });
+  }
 }

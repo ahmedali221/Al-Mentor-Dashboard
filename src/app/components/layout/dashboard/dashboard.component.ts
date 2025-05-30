@@ -7,6 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
+import { DashboardChartsComponent } from '../../dashboard-charts/dashboard-charts.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,10 +23,14 @@ import { FormsModule } from '@angular/forms';
     MatIconModule,
     MatSlideToggleModule,
     FormsModule,
+    DashboardChartsComponent,
   ],
 })
 export class DashboardComponent {
   menuItems = [
+    // Dashboard
+    { path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
+
     // Users
     { path: '/users', icon: 'people', label: 'Users' },
     { path: '/instructors', icon: 'school', label: 'Instructors' },
