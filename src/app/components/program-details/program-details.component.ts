@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProgramsService } from '../../services/programs.service';
 import { CoursesService } from '../../services/course.service';
 import { Program } from '../../interfaces/program.interface';
@@ -8,12 +8,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatList, MatListItem } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Course } from '../../interfaces/course';
 import { MultilingualString } from '../../interfaces/multilingual-string.interface';
 
@@ -22,9 +23,8 @@ import { MultilingualString } from '../../interfaces/multilingual-string.interfa
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatInputModule,
-    MatList,
-    MatListItem,
     MatSelectModule,
     FormsModule,
     ReactiveFormsModule,
@@ -32,7 +32,8 @@ import { MultilingualString } from '../../interfaces/multilingual-string.interfa
     MatIconModule,
     MatProgressSpinnerModule,
     MatButtonModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatTooltipModule
   ],
   templateUrl: './program-details.component.html',
   styleUrls: ['./program-details.component.scss']
@@ -47,6 +48,7 @@ export class ProgramDetailsComponent implements OnInit {
   allCourses: Course[] = [];
   unassociatedCourses: Course[] = [];
   selectedCourseId: string | null = null;
+  courseDetails: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -59,57 +61,45 @@ export class ProgramDetailsComponent implements OnInit {
 
   createForm(program?: Program) {
     this.updateForm = this.fb.group({
-      title: this.fb.group({
-        en: [program?.title?.en || '', Validators.required],
-        ar: [program?.title?.ar || '', Validators.required]
-      }),
-      slug: this.fb.group({
-        en: [program?.slug?.en || '', Validators.required],
-        ar: [program?.slug?.ar || '', Validators.required]
-      }),
-      description: this.fb.group({
-        en: [program?.description?.en || '', Validators.required],
-        ar: [program?.description?.ar || '', Validators.required]
-      }),
-      thumbnail: [program?.thumbnail || '', Validators.required],
-      level: this.fb.group({
-        en: [program?.level?.en || '', Validators.required],
-        ar: [program?.level?.ar || '', Validators.required]
-      }),
-      language: [program?.language || '', Validators.required],
-      category: this.fb.group({
-        en: [program?.category?.en || '', Validators.required],
-        ar: [program?.category?.ar || '', Validators.required]
-      }),
-      totalDuration: [program?.totalDuration || '', Validators.required],
-      courses: [program?.courses || []], // Array of string ids
-      learningOutcomes: this.fb.array(
-        (program?.learningOutcomes || []).map(outcome =>
-          this.fb.group({
-            en: [outcome.en, Validators.required],
-            ar: [outcome.ar, Validators.required]
-          })
-        )
-      )
+      titleEn: ['', Validators.required],
+      titleAr: ['', Validators.required],
+      slugEn: ['', Validators.required],
+      slugAr: ['', Validators.required],
+      descriptionEn: ['', Validators.required],
+      descriptionAr: ['', Validators.required],
+      levelEn: ['', Validators.required],
+      levelAr: ['', Validators.required],
+      categoryEn: ['', Validators.required],
+      categoryAr: ['', Validators.required],
+      language: ['', Validators.required],
+      totalDuration: [0, [Validators.required, Validators.min(0)]],
+      thumbnail: ['', Validators.required],
+      learningOutcomes: this.fb.array([])
     });
   }
 
   ngOnInit() {
     const programId = this.route.snapshot.paramMap.get('id');
     if (programId) {
-      this.programsService.getProgramById(programId).subscribe({
-        next: (program) => {
-          this.program = program;
-          this.createForm(this.program);
-          this.loading = false;
-          this.loadCourses();
-          
-        },
-        error: () => {
-          this.loading = false;
-        }
-      });
+      this.loadProgram(programId);
     }
+  }
+
+  loadProgram(programId: string) {
+    this.loading = true;
+    this.programsService.getProgramById(programId).subscribe({
+      next: (program) => {
+        this.program = program;
+        this.courseDetails = program.courseDetails || [];
+        console.log('Program Course Details:', this.courseDetails);
+        this.loading = false;
+        this.loadCourses();
+      },
+      error: (error) => {
+        console.error('Error loading program:', error);
+        this.loading = false;
+      }
+    });
   }
 
   loadCourses() {
@@ -118,30 +108,115 @@ export class ProgramDetailsComponent implements OnInit {
         this.allCourses = courses;
        this.addCourseToProgram();
         this.updateUnassociatedCourses();
+      },
+      error: (error) => {
+        console.error('Error loading courses:', error);
       }
     });
   }
 
   openUpdateDetailsForm(program: Program): void {
     this.selectedProgram = program;
-    this.createForm(program);
+    this.updateForm.patchValue({
+      titleEn: program.title?.en || '',
+      titleAr: program.title?.ar || '',
+      slugEn: program.slug?.en || '',
+      slugAr: program.slug?.ar || '',
+      descriptionEn: program.description?.en || '',
+      descriptionAr: program.description?.ar || '',
+      levelEn: program.level?.en || '',
+      levelAr: program.level?.ar || '',
+      categoryEn: program.category?.en || '',
+      categoryAr: program.category?.ar || '',
+      language: program.language || '',
+      totalDuration: program.totalDuration || 0,
+      thumbnail: program.thumbnail || ''
+    });
+
+    // Clear existing learning outcomes
+    while (this.learningOutcomesArray.length) {
+      this.learningOutcomesArray.removeAt(0);
+    }
+
+    // Add existing learning outcomes
+    if (program.learningOutcomes) {
+      program.learningOutcomes.forEach((outcome: any) => {
+        const outcomeGroup = this.fb.group({
+          en: [outcome.en || '', Validators.required],
+          ar: [outcome.ar || '', Validators.required]
+        });
+        this.learningOutcomesArray.push(outcomeGroup);
+      });
+    }
 
     this.dialog.open(this.updateDetailsDialog, {
-      width: '800px'
+      width: '1200px',
+      maxHeight: '90vh'
     });
   }
 
+  get learningOutcomesArray() {
+    return this.updateForm.get('learningOutcomes') as FormArray;
+  }
+
+  addLearningOutcome() {
+    const outcomeGroup = this.fb.group({
+      en: ['', Validators.required],
+      ar: ['', Validators.required]
+    });
+    this.learningOutcomesArray.push(outcomeGroup);
+  }
+
+  removeLearningOutcome(index: number) {
+    this.learningOutcomesArray.removeAt(index);
+  }
+
   updateProgram(): void {
-    if (this.updateForm.valid && this.selectedProgram) {
-      const updatedProgram: Program = {
-        ...this.selectedProgram,
-        ...this.updateForm.value,
-        courses: this.updateForm.value.courses
+    if (this.updateForm.valid) {
+      const formValue = this.updateForm.value;
+      const updatedProgram = {
+        _id: this.selectedProgram._id,
+        title: {
+          en: formValue.titleEn,
+          ar: formValue.titleAr
+        },
+        slug: {
+          en: formValue.slugEn,
+          ar: formValue.slugAr
+        },
+        description: {
+          en: formValue.descriptionEn,
+          ar: formValue.descriptionAr
+        },
+        level: {
+          en: formValue.levelEn,
+          ar: formValue.levelAr
+        },
+        category: {
+          en: formValue.categoryEn,
+          ar: formValue.categoryAr
+        },
+        language: formValue.language,
+        totalDuration: formValue.totalDuration,
+        thumbnail: formValue.thumbnail,
+        learningOutcomes: formValue.learningOutcomes.map((outcome: any) => ({
+          en: outcome.en,
+          ar: outcome.ar
+        })),
+        courses: this.selectedProgram.courses,
+        courseDetails: this.selectedProgram.courseDetails,
+        createdAt: this.selectedProgram.createdAt,
+        updatedAt: this.selectedProgram.updatedAt,
+        __v: this.selectedProgram.__v
       };
+
       this.programsService.updateProgram(updatedProgram).subscribe({
-        next: () => {
-          this.program = updatedProgram;
+        next: (response) => {
+          this.program = response;
           this.dialog.closeAll();
+        },
+        error: (error) => {
+          console.error('Error updating program:', error);
         }
       });
     }
@@ -151,39 +226,41 @@ export class ProgramDetailsComponent implements OnInit {
     if (this.program && this.allCourses) {
       const courseIds = this.program.courses || [];
       this.unassociatedCourses = this.allCourses.filter(course =>
-        !courseIds.includes(course._id)
+        !this.program.courses.includes(course._id)
       );
     }
   }
 
   addCourseToProgram() {
     if (this.selectedCourseId && this.program) {
-      if (!this.program.courses.includes(this.selectedCourseId)) {
-        const updatedCourses = [...this.program.courses, this.selectedCourseId];
-        this.programsService
-          .updateProgram({ ...this.program, courses: updatedCourses })
-          .subscribe({
-            next: (updated) => {
-              this.program.courses = updated.courses;
-              this.updateUnassociatedCourses();
-              this.selectedCourseId = null;
-            }
-          });
-      }
+      this.programsService.addCourseToProgram(this.program._id, this.selectedCourseId).subscribe({
+        next: (updatedProgram) => {
+          this.program = updatedProgram;
+          this.courseDetails = updatedProgram.courseDetails;
+          this.updateUnassociatedCourses();
+          this.selectedCourseId = null;
+        },
+        error: (error) => {
+          console.error('Error adding course to program:', error);
+          alert('Failed to add course to program. Please try again.');
+        }
+      });
     }
   }
 
   removeCourseFromProgram(courseId: string) {
     if (this.program) {
-      const updatedCourses = this.program.courses.filter(id => id !== courseId);
-      this.programsService
-        .updateProgram({ ...this.program, courses: updatedCourses })
-        .subscribe({
-          next: (updated) => {
-            this.program.courses = updated.courses;
-            this.updateUnassociatedCourses();
-          }
-        });
+      this.programsService.removeCourseFromProgram(this.program._id, courseId).subscribe({
+        next: (updatedProgram) => {
+          this.program = updatedProgram;
+          this.courseDetails = updatedProgram.courseDetails;
+          this.updateUnassociatedCourses();
+        },
+        error: (error) => {
+          console.error('Error removing course from program:', error);
+          alert('Failed to remove course from program. Please try again.');
+        }
+      });
     }
   }
 
@@ -201,5 +278,9 @@ export class ProgramDetailsComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  closeDialog(): void {
+    this.dialog.closeAll();
   }
 }

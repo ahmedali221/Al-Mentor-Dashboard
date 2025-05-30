@@ -53,7 +53,7 @@
         <mat-card-content>
           <div>
             <h3>Associated Courses</h3>
-            <p>{{ program.courseDetails?.length || 0 }}</p>
+            <p>{{ program.courseDetails }}</p>
           </div>
         </mat-card-content>
       </mat-card>
@@ -77,35 +77,70 @@
         
         <div class="associated-courses">
           <h3>Associated Courses</h3>
-          <ng-container *ngIf="program.courseDetails?.length; else noCourses">
-            <mat-list>
-              <mat-list-item *ngFor="let course of program.courseDetails">
-                <span>
-                  {{ course.title.en || 'Untitled Course' }}
-                </span>
+          <div
+            *ngIf="courseDetails.length > 0; else noCourses"
+            class="courses-grid"
+          >
+            <mat-card *ngFor="let course of courseDetails" class="course-card">
+              <img
+                mat-card-image
+                [src]="course.thumbnail"
+                [alt]="course.title?.en"
+                [title]="course.title?.en"
+                class="course-thumbnail"
+              />
+              <mat-card-content>
+                <h4 class="course-title">
+                  {{ course.title?.en || "Untitled Course" }}
+                </h4>
+                <p class="course-description" *ngIf="course.description?.en">
+                  {{ course.description.en | slice : 0 : 100
+                  }}{{ course.description.en.length > 100 ? "..." : "" }}
+                </p>
+                <div class="course-meta">
+                  <span class="course-duration" *ngIf="course.duration">
+                    <mat-icon>schedule</mat-icon>
+                    {{ course.duration }} Hours
+                  </span>
+                  <span class="course-level">
+                    <mat-icon>school</mat-icon>
+                    {{ course.level?.en | titlecase }}
+                  </span>
+                  <span class="course-language">
+                    <mat-icon>language</mat-icon>
+                    {{ course.language?.en }}
+                  </span>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
                 <button
-                  mat-icon-button
+                  mat-button
                   color="warn"
                   (click)="removeCourseFromProgram(course._id)"
-                  *ngIf="course._id"
+                  matTooltip="Remove Course"
                 >
                   <mat-icon>delete</mat-icon>
+                  Remove
                 </button>
-              </mat-list-item>
-            </mat-list>
-          </ng-container>
+              </mat-card-actions>
+            </mat-card>
+          </div>
           <ng-template #noCourses>
-            <p>No courses associated with this program</p>
+            <div class="no-courses-message">
+              <mat-icon>school</mat-icon>
+              <p>No courses associated with this program</p>
+            </div>
           </ng-template>
           <div class="add-course-form">
+            <h4>Add New Course</h4>
             <mat-form-field appearance="outline">
-              <mat-label>Add Course</mat-label>
+              <mat-label>Select Course</mat-label>
               <mat-select [(ngModel)]="selectedCourseId">
                 <mat-option
                   *ngFor="let course of unassociatedCourses"
                   [value]="course._id"
                 >
-                  {{ course.title.en ||  course._id  }}
+                  {{ course.title.en}}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -115,6 +150,7 @@
               (click)="addCourseToProgram()"
               [disabled]="!selectedCourseId"
             >
+              <mat-icon>add</mat-icon>
               Add Course
             </button>
           </div>
@@ -125,103 +161,223 @@
 </div>
 
 <ng-template #updateDetailsDialog>
-  <mat-card>
+  <mat-card class="update-program-dialog">
     <mat-card-header>
-      <mat-card-title>Update Program</mat-card-title>
+      <mat-card-title>Update Program Details</mat-card-title>
+      <mat-card-subtitle>Edit the program information below</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <form
         [formGroup]="updateForm"
         (ngSubmit)="updateProgram()"
-        class="program-form-grid"
+        class="program-form"
       >
-        <div class="grid-container">
-          <div>
-            <div formGroupName="title">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Title (EN)</mat-label>
-                <input matInput formControlName="en" />
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Title (AR)</mat-label>
-                <input matInput formControlName="ar" />
-              </mat-form-field>
-            </div>
-            <div formGroupName="slug">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Slug (EN)</mat-label>
-                <input matInput formControlName="en" />
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Slug (AR)</mat-label>
-                <input matInput formControlName="ar" />
-              </mat-form-field>
-            </div>
-            <div formGroupName="description">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Description (EN)</mat-label>
-                <textarea matInput formControlName="en"></textarea>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Description (AR)</mat-label>
-                <textarea matInput formControlName="ar"></textarea>
-              </mat-form-field>
-            </div>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Thumbnail URL</mat-label>
-              <input matInput formControlName="thumbnail" />
-            </mat-form-field>
+        <div class="form-section">
+          <div class="section-header">
+            <h3>Basic Information</h3>
+            <p class="section-description">
+              Enter the program's basic details in both English and Arabic
+            </p>
           </div>
-          <div>
-            <div formGroupName="level">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Level (EN)</mat-label>
-                <mat-select formControlName="en">
-                  <mat-option value="beginner">Beginner</mat-option>
-                  <mat-option value="intermediate">Intermediate</mat-option>
-                  <mat-option value="advanced">Advanced</mat-option>
-                </mat-select>
+
+          <div class="form-grid">
+            <div class="language-section">
+              <h4>English Content</h4>
+              <mat-form-field appearance="outline">
+                <mat-label>Title (English)</mat-label>
+                <input matInput formControlName="titleEn" />
+                <mat-hint>Enter the program title in English</mat-hint>
               </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Level (AR)</mat-label>
-                <mat-select formControlName="ar">
-                  <mat-option value="مبتدئ">مبتدئ</mat-option>
-                  <mat-option value="متوسط">متوسط</mat-option>
-                  <mat-option value="متقدم">متقدم</mat-option>
-                </mat-select>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Slug (English)</mat-label>
+                <input matInput formControlName="slugEn" />
+                <mat-hint>URL-friendly version of the title</mat-hint>
               </mat-form-field>
-            </div>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Language</mat-label>
-              <mat-select formControlName="language">
-                <mat-option value="en">English</mat-option>
-                <mat-option value="ar">Arabic</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div formGroupName="category">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Category (EN)</mat-label>
-                <input matInput formControlName="en" />
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Category (AR)</mat-label>
-                <input matInput formControlName="ar" />
+
+              <mat-form-field appearance="outline">
+                <mat-label>Description (English)</mat-label>
+                <textarea
+                  matInput
+                  formControlName="descriptionEn"
+                  rows="4"
+                ></textarea>
+                <mat-hint
+                  >Provide a detailed description of the program</mat-hint
+                >
               </mat-form-field>
             </div>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Total Duration</mat-label>
-              <input matInput type="number" formControlName="totalDuration" />
-            </mat-form-field>
+
+            <div class="language-section">
+              <h4>Arabic Content</h4>
+              <mat-form-field appearance="outline">
+                <mat-label>Title (Arabic)</mat-label>
+                <input matInput formControlName="titleAr" />
+                <mat-hint>Enter the program title in Arabic</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Slug (Arabic)</mat-label>
+                <input matInput formControlName="slugAr" />
+                <mat-hint>URL-friendly version of the title</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Description (Arabic)</mat-label>
+                <textarea
+                  matInput
+                  formControlName="descriptionAr"
+                  rows="4"
+                ></textarea>
+                <mat-hint
+                  >Provide a detailed description of the program</mat-hint
+                >
+              </mat-form-field>
+            </div>
           </div>
         </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h3>Program Settings</h3>
+            <p class="section-description">
+              Configure the program's technical details and requirements
+            </p>
+          </div>
+
+          <div class="form-grid">
+            <div class="settings-section">
+              <mat-form-field appearance="outline">
+                <mat-label>Thumbnail URL</mat-label>
+                <input matInput formControlName="thumbnail" />
+                <mat-hint
+                  >Enter the URL for the program thumbnail image</mat-hint
+                >
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Language</mat-label>
+                <input matInput formControlName="language" />
+                <mat-hint>Primary language of instruction</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Total Duration (Hours)</mat-label>
+                <input matInput type="number" formControlName="totalDuration" />
+                <mat-hint>Total program duration in hours</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <div class="settings-section">
+              <div class="level-section">
+                <h4>Program Level</h4>
+                <mat-form-field appearance="outline">
+                  <mat-label>Level (English)</mat-label>
+                  <mat-select formControlName="levelEn">
+                    <mat-option value="beginner">Beginner</mat-option>
+                    <mat-option value="intermediate">Intermediate</mat-option>
+                    <mat-option value="advanced">Advanced</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Level (Arabic)</mat-label>
+                  <mat-select formControlName="levelAr">
+                    <mat-option value="مبتدئ">مبتدئ</mat-option>
+                    <mat-option value="متوسط">متوسط</mat-option>
+                    <mat-option value="متقدم">متقدم</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="category-section">
+                <h4>Program Category</h4>
+                <mat-form-field appearance="outline">
+                  <mat-label>Category (English)</mat-label>
+                  <mat-select formControlName="categoryEn">
+                    <mat-option value="language">Language</mat-option>
+                    <mat-option value="business">Business</mat-option>
+                    <mat-option value="development">Development</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Category (Arabic)</mat-label>
+                  <mat-select formControlName="categoryAr">
+                    <mat-option value="لغة">لغة</mat-option>
+                    <mat-option value="أعمال">أعمال</mat-option>
+                    <mat-option value="تطوير">تطوير</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h3>Learning Outcomes</h3>
+            <p class="section-description">
+              Define what students will learn from this program
+            </p>
+          </div>
+
+          <div formArrayName="learningOutcomes" class="outcomes-container">
+            <div
+              *ngFor="
+                let outcome of learningOutcomesArray.controls;
+                let i = index
+              "
+              [formGroupName]="i"
+              class="outcome-item"
+            >
+              <div class="outcome-content">
+                <mat-form-field appearance="outline">
+                  <mat-label>Outcome (English)</mat-label>
+                  <input matInput formControlName="en" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Outcome (Arabic)</mat-label>
+                  <input matInput formControlName="ar" />
+                </mat-form-field>
+              </div>
+
+              <button
+                type="button"
+                mat-icon-button
+                color="warn"
+                (click)="removeLearningOutcome(i)"
+                matTooltip="Remove this outcome"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            mat-stroked-button
+            color="primary"
+            (click)="addLearningOutcome()"
+            class="add-outcome-button"
+          >
+            <mat-icon>add</mat-icon>
+            Add Learning Outcome
+          </button>
+        </div>
+
         <div class="form-actions">
+          <button mat-button type="button" (click)="closeDialog()">
+            Cancel
+          </button>
           <button
             mat-raised-button
             color="primary"
             type="submit"
             [disabled]="updateForm.invalid"
           >
-            Update
+            Update Program
           </button>
         </div>
       </form>

@@ -22,9 +22,8 @@ import { DashboardChartsComponent } from '../../dashboard-charts/dashboard-chart
     MatListModule,
     MatIconModule,
     MatSlideToggleModule,
-    FormsModule,
-    DashboardChartsComponent,
-  ],
+    FormsModule
+],
 })
 export class DashboardComponent {
   menuItems = [
