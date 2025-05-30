@@ -13,7 +13,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatList, MatListItem } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Course } from '../../interfaces/course';
 
@@ -24,8 +23,6 @@ import { Course } from '../../interfaces/course';
     CommonModule,
     RouterModule,
     MatInputModule,
-    MatList,
-    MatListItem,
     MatSelectModule,
     FormsModule,
     ReactiveFormsModule,

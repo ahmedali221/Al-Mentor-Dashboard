@@ -104,7 +104,7 @@ export class CLessonsComponent implements OnInit {
 
   loadLessons() {
     this.isLoading = true;
-    this.lessonsService.getLessons().subscribe({
+    this.lessonsService.getLessons('someValidId').subscribe({
       next: (data: Lesson[]) => {
         this.lessons = data;
         this.filteredLessons = [...this.lessons];

@@ -14,7 +14,7 @@ export class LessonsService {
 
   constructor(private http: HttpClient) { }
 
-  getLessons(): Observable<Lesson[]> {
+  getLessons(_id: string): Observable<Lesson[]> {
     return this.http.get<Lesson[]>(`${this.apiUrl}/lessons`)
       .pipe(
         tap(lessons => console.log('Fetched lessons:', lessons)),
