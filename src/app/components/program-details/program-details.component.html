@@ -53,7 +53,7 @@
         <mat-card-content>
           <div>
             <h3>Associated Courses</h3>
-            <p>{{ program.courseDetails }}</p>
+            <p>{{ program.courses.length }}</p>
           </div>
         </mat-card-content>
       </mat-card>
@@ -74,7 +74,7 @@
           <span class="label">Description:</span>
           <p>{{ program.description.en }}</p>
         </div>
-        
+
         <div class="associated-courses">
           <h3>Associated Courses</h3>
           <div
@@ -131,6 +131,7 @@
               <p>No courses associated with this program</p>
             </div>
           </ng-template>
+
           <div class="add-course-form">
             <h4>Add New Course</h4>
             <mat-form-field appearance="outline">
@@ -140,7 +141,7 @@
                   *ngFor="let course of unassociatedCourses"
                   [value]="course._id"
                 >
-                  {{ course.title.en }}
+                  {{ course.title?.en }}
                 </mat-option>
               </mat-select>
             </mat-form-field>

@@ -19,7 +19,17 @@
       </mat-card-content>
     </mat-card>
 
-    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon">check_circle</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ activeCourses }}</span>
+            <span class="stat-label">Non-Free Courses</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <div class="filters">
@@ -76,10 +86,10 @@
         <td mat-cell *matCellDef="let course">{{ course.language.en }}</td>
       </ng-container>
 
-      <ng-container matColumnDef="lessonsCount">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let course">
-        </td>
+      <!-- Duration Column -->
+      <ng-container matColumnDef="duration">
+        <th mat-header-cell *matHeaderCellDef> Duration (min) </th>
+        <td mat-cell *matCellDef="let course">{{ course.duration }}</td>
       </ng-container>
 
       <!-- Actions Column -->
