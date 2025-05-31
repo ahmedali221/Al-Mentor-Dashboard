@@ -1,4 +1,6 @@
 export interface Lesson {
+  status: string;
+  availableLanguages: string[];
   _id: string;
   title: {
     en: string;

@@ -27,6 +27,7 @@
     width: 100%;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
+    max-height: fit-content;
 }
 
 .full-width {
@@ -37,4 +38,9 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 16px;
+}
+.update-instructor-card mat-card-content {
+  overflow-y: auto;
+  max-height: 90vh; /* leave space for header & footer */
+  padding-right: 1rem; /* space for scrollbar */
 }

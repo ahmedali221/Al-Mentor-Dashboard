@@ -86,13 +86,13 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let instructor">
-            <!-- <button
+            <button
               mat-icon-button
               color="primary"
               (click)="openUpdateInstructorForm(instructor)"
             >
               <mat-icon>edit</mat-icon>
-            </button> -->
+            </button>
             <button
               mat-icon-button
               color="warn"
@@ -228,7 +228,7 @@ Add Instructor Dialog
 
 <!-- Update Instructor Dialog -->
 <ng-template #updateInstructorDialog>
-  <mat-card>
+  <mat-card class="update-instructor-card">
     <mat-card-header>
       <mat-card-title>Update Instructor</mat-card-title>
     </mat-card-header>
@@ -335,7 +335,7 @@ Add Instructor Dialog
             </mat-form-field>
           </div>
         </div>
-        <!-- <div class="form-actions">
+        <div class="form-actions">
           <button
             mat-raised-button
             color="primary"
@@ -344,7 +344,7 @@ Add Instructor Dialog
           >
             Update
           </button>
-        </div> -->
+        </div>
       </form>
     </mat-card-content>
   </mat-card>
