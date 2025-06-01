@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -10,6 +10,7 @@ interface InstructorResponse {
   message: string;
   data: Instructor[];
   count: number;
+  total: number;
 }
 
 @Injectable({
@@ -20,11 +21,14 @@ export class InstructorsService {
 
   constructor(private http: HttpClient) { }
 
-  getInstructors(): Observable<Instructor[]> {
-    console.log('Fetching from:', this.apiUrl);
-    return this.http.get<InstructorResponse>(this.apiUrl).pipe(
-      map(response => response.data)
-    );
+  getInstructors(page: number = 1, limit: number = 12): Observable<InstructorResponse> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    console.log('Fetching from:', this.apiUrl, 'Page:', page, 'Limit:', limit);
+
+    return this.http.get<InstructorResponse>(this.apiUrl, { params });
   }
 
   getInstructor(id: string): Observable<Instructor> {
@@ -40,7 +44,6 @@ export class InstructorsService {
   }
 
   updateInstructor(instructor: Instructor): Observable<Instructor> {
-    // Use _id as the identifier for update
     return this.http.put<{ data: Instructor }>(`${this.apiUrl}/${instructor._id}`, instructor).pipe(
       map(response => response.data)
     );

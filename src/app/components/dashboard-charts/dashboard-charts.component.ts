@@ -142,20 +142,23 @@ export class DashboardChartsComponent implements OnInit {
     });
   }
 
-  loadInstructors(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.instructorsService.getInstructors().subscribe({
-        next: (instructors: Instructor[]) => {
-          this.instructors = instructors;
+loadInstructors(): Promise<void> {
+    return new Promise((resolve) => {
+      this.instructorsService.getInstructors().subscribe(
+        (response: any) => {
+          // Adjust according to your actual response structure
+          this.instructors = response.instructors || response.data || [];
           resolve();
         },
-        error: (error) => {
+        (error: any) => {
           console.error('Failed to load instructors:', error);
           resolve(); // Resolve so other data can still load
         }
-      });
+      );
     });
   }
+
+
 
   loadStudents(): Promise<void> {
     return new Promise((resolve, reject) => {

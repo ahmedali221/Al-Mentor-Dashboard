@@ -67,6 +67,10 @@ export class CoursesComponent implements OnInit {
   addForm!: FormGroup;
   updateForm!: FormGroup;
 
+  // Pagination variables
+  pageIndex: number = 0;
+  pageSize: number = 12;
+
   constructor(
     private coursesService: CoursesService,
     private topicsService: TopicsService,
@@ -198,7 +202,6 @@ export class CoursesComponent implements OnInit {
   }
 
   get activeCourses(): number {
-    // Assuming 'status' is a UI-only field, optional on Course interface
     return this.courses.filter((course) => course.isFree === false).length;
   }
 
@@ -240,9 +243,9 @@ export class CoursesComponent implements OnInit {
   }
 
   loadInstructors() {
-    this.instructorsService.getInstructors().subscribe({
-      next: (instructors) => {
-        this.instructors = instructors;
+    this.instructorsService.getInstructors(this.pageIndex + 1, this.pageSize).subscribe({
+      next: (response) => {
+        this.instructors = response.data;
       },
       error: (err) => {
         console.error('Error loading instructors:', err);

@@ -14,7 +14,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../interfaces/user.interface';
-
+import { MatPaginatorModule } from '@angular/material/paginator'; // Import MatPaginatorModule
 
 @Component({
   selector: 'app-instructors',
@@ -26,10 +26,15 @@ import { User } from '../../interfaces/user.interface';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatInputModule, MatDividerModule, ReactiveFormsModule, MatDialogModule, MatSelectModule
+    MatPaginatorModule,
+    MatInputModule, 
+    MatDividerModule, 
+    ReactiveFormsModule, 
+    MatDialogModule, 
+    MatSelectModule
   ],
   templateUrl: './instructors.component.html',
-  styleUrl: './instructors.component.scss'
+  styleUrls: ['./instructors.component.scss']
 })
 export class InstructorsComponent implements OnInit {
   displayedColumns: string[] = ['profile', 'email', 'professionalTitle', 'expertiseAreas', 'approvalStatus', 'actions'];
@@ -39,6 +44,9 @@ export class InstructorsComponent implements OnInit {
   loading = false;
   error = '';
   filteredInstructors: Instructor[] = [];
+  pageIndex: number = 0;
+  pageSize: number = 12;
+  totalInstructors: number = 0;
 
   addInstructorForm: FormGroup;
   updateInstructorForm: FormGroup;
@@ -53,7 +61,6 @@ export class InstructorsComponent implements OnInit {
     private fb: FormBuilder,
     private dialog: MatDialog
   ) {
-    // Add Instructor Form
     this.addInstructorForm = this.fb.group({
       user: ['', Validators.required],
       nameEn: ['', Validators.required],
@@ -72,7 +79,6 @@ export class InstructorsComponent implements OnInit {
       approvalStatus: ['pending', Validators.required]
     });
 
-    // Update Instructor Form
     this.updateInstructorForm = this.fb.group({
       user: ['', Validators.required],
       nameEn: ['', Validators.required],
@@ -113,13 +119,15 @@ export class InstructorsComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    this.instructorsService.getInstructors().subscribe({
-      next: (data) => {
-        this.instructors = data;
-        this.filteredInstructors = [...data]; // Initialize filtered array
+    const page = this.pageIndex + 1;
+
+    this.instructorsService.getInstructors(page, this.pageSize).subscribe({
+      next: (response) => {
+        this.instructors = response.data;
+        this.totalInstructors = response.total;
+        this.filteredInstructors = [...response.data];
         this.loading = false;
         console.log(this.instructors)
-
       },
       error: (error) => {
         this.error = 'Failed to load instructors';
@@ -146,9 +154,16 @@ export class InstructorsComponent implements OnInit {
     );
   }
 
-  get totalInstructors(): number {
-    return this.instructors.length;
+  onPageChange(event: any) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadInstructors();
   }
+
+  // get totalInstructors(): number {
+  //   return this.instructors.length;
+  // }
+
   deleteInstructor(userId: string) {
     if (confirm('Are you sure you want to delete this instructor?')) {
       this.instructorsService.deleteInstructor(userId).subscribe({
@@ -171,7 +186,6 @@ export class InstructorsComponent implements OnInit {
   openUpdateInstructorForm(instructor: Instructor) {
     this.selectedInstructor = instructor;
 
-    // Extract values from the instructor object to populate the form
     this.updateInstructorForm.patchValue({
       user: instructor.user,
       nameEn: instructor.name?.en || '',
@@ -193,70 +207,22 @@ export class InstructorsComponent implements OnInit {
     this.dialog.open(this.updateInstructorDialog, { width: '70%' });
   }
 
-  // addInstructor() {
-  //   if (this.addInstructorForm.valid) {
-  //     const formValue = this.addInstructorForm.value;
-
-  //     // Create a properly structured instructor object
-  //     const newInstructor: Instructor = {
-  //       user: formValue.user,
-  //       name: {
-  //         en: formValue.nameEn,
-  //         ar: formValue.nameAr
-  //       },
-  //       professionalTitle: {
-  //         en: formValue.professionalTitleEn,
-  //         ar: formValue.professionalTitleAr
-  //       },
-  //       biography: {
-  //         en: formValue.biographyEn,
-  //         ar: formValue.biographyAr
-  //       },
-  //       expertiseAreas: {
-  //         en: formValue.expertiseAreasEn.split(',').map((s: string) => s.trim()),
-  //         ar: formValue.expertiseAreasAr ? formValue.expertiseAreasAr.split(',').map((s: string) => s.trim()) : []
-  //       },
-  //       yearsOfExperience: formValue.yearsOfExperience,
-  //       socialMediaLinks: {
-  //         linkedin: formValue.linkedin,
-  //         twitter: formValue.twitter,
-  //         youtube: formValue.youtube,
-  //         website: formValue.website
-  //       },
-  //       approvalStatus: formValue.approvalStatus,
-  //       profile: {
-  //         firstName: { en: '', ar: '' },
-  //         lastName: { en: '', ar: '' },
-  //         email: '',
-  //         profilePicture: ''
-  //       }
-  //     };
-
-  //     this.instructorsService.addInstructor(newInstructor).subscribe({
-  //       next: () => {
-  //         this.loadInstructors();
-  //         this.dialog.closeAll();
-  //       }
-  //     });
-  //   }
-  // }
   onUserSelectionChange(event: MatSelectChange): void {
     const selectedUserId = event.value;
     const selectedUser = this.users.find(user => user._id === selectedUserId);
 
     if (selectedUser) {
-      // Update the name fields with the user's first and last name
       this.updateInstructorForm.patchValue({
         nameEn: `${selectedUser.firstName?.en || ''} ${selectedUser.lastName?.en || ''}`.trim(),
         nameAr: `${selectedUser.firstName?.ar || ''} ${selectedUser.lastName?.ar || ''}`.trim()
       });
     }
   }
+
   updateInstructor() {
     if (this.updateInstructorForm.valid && this.selectedInstructor) {
       const formValue = this.updateInstructorForm.value;
 
-      // Create updated instructor object with proper structure
       const updatedInstructor: Instructor = {
         ...this.selectedInstructor,
         user: formValue.user,
